@@ -1,11 +1,11 @@
 const express = require('express');
+const openApi = require('../../public/res/openapi.json');
 
 const apiRouter = express.Router();
 
-apiRouter.get('/', (req, res, next) => {
-    res.send('Hello World!');
+apiRouter.get('/openapi.json', (req, res, next) => {
+    res.json(openApi);
 });
-
 
 
 module.exports = apiRouter;
