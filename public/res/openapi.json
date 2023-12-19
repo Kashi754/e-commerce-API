@@ -1,0 +1,1164 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "description": "An api for interacting with an E-Commerce server.",
+    "version": "1.0.0",
+    "title": "Online E-Commerce API",
+    "contact": {
+      "email": "arigorn15@gmail.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "http://localhost:3000/",
+  "tags": [
+    {
+      "name": "User",
+      "description": "Operations about user"
+    },
+    {
+      "name": "Products",
+      "description": "Access to E-Commerce API products"
+    },
+    {
+      "name": "Cart",
+      "description": "Operations about User's Cart"
+    },
+    {
+      "name": "Order",
+      "description": "Operations about User's Orders"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/register": {
+      "summary": "Register a new user",
+      "description": "This path is used to register a new user to the database",
+      "post": {
+        "summary": "Add new user",
+        "description": "Register a new user to the database",
+        "operationId": "register_user",
+        "requestBody": {
+          "description": "User Credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_info"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": {
+                  "Message": {
+                    "value": "Success"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing Required Information (username, email, password, first name, last name)",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Missing Required Information: USERNAME"
+              }
+            }
+          },
+          "422": {
+            "description": "User with given email/username already exists",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "User with that username or email already exists"
+              }
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/login": {
+      "summary": "Log in as user",
+      "description": "This path is used to Log in to the API",
+      "post": {
+        "summary": "Log in as User",
+        "description": "Send login credentials to the server and request authentication",
+        "operationId": "login_user",
+        "requestBody": {
+          "description": "User Credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "user_id": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Incorrect Password",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Incorrect Password"
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "User with username or email {user} does not exist"
+              }
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/users/{userId}": {
+      "summary": "The user's information",
+      "description": "Operate on a user's information given a user Id",
+      "get": {
+        "summary": "Get user's information",
+        "description": "Request the information for a specific user, if that user is the current logged in user.",
+        "operationId": "get_user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": {
+                    "userId": null
+                  },
+                  "user": {
+                    "username": "test_user",
+                    "email": "john_doe@email.com",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "cart_id": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to view a User's information"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to view user with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "User with ID {userId} not found"
+              }
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      },
+      "put": {
+        "summary": "Edit user's information",
+        "description": "Edit information for a specific user, if that user is the logged in user and return the changed user information.",
+        "operationId": "put_user",
+        "requestBody": {
+          "description": "User Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_update"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "provided userId",
+                  "user": {
+                    "username": "test_user,",
+                    "email": "john_doe@email.com",
+                    "first_name": "John,",
+                    "last_name": "Doe"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to edit a User's information"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to edit user with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "User with ID {userId} not found"
+              }
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/products": {
+      "summary": "Product information",
+      "description": "Search for products",
+      "get": {
+        "summary": "Search for products",
+        "description": "Search the database by category, category_name, product_name, or price and return results",
+        "operationId": "search_products",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "categoryId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The id of the category to search for"
+          },
+          {
+            "in": "query",
+            "name": "category_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The name of the category to search for"
+          },
+          {
+            "in": "query",
+            "name": "product_name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The name of the product to search for"
+          },
+          {
+            "in": "query",
+            "name": "price_less_than",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Search for products with a price less than this"
+          },
+          {
+            "in": "query",
+            "name": "price_greater_than",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Search for products with a price greather than this"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "product": {
+                      "name": "example_product1",
+                      "price": "$5.00",
+                      "description": "Description",
+                      "qty_in_stock": 100
+                    }
+                  },
+                  {
+                    "id": 2,
+                    "product": {
+                      "name": "example_product2",
+                      "price\"": "$5.00",
+                      "description\"": "Description",
+                      "qty_in_stock\"": 100
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "No products found"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/products/{productId}": {
+      "summary": "Product information",
+      "description": "View product information",
+      "get": {
+        "summary": "Get product information by id",
+        "description": "Request the information for a specific product",
+        "operationId": "get_product",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "The id of the product.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "{productId}",
+                  "product": {
+                    "name": "example_product",
+                    "price": "$5.00",
+                    "description": "This is a description of the product",
+                    "qty_in_stock": 100
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Product with ID {productId} not found"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/cart/{cartId}": {
+      "summary": "The user's cart information",
+      "description": "Operate on a user's cart given a cart Id",
+      "get": {
+        "summary": "Get user's cart information",
+        "description": "Request the information for a specific user's cart, if that user is the current logged in user.",
+        "operationId": "get_cart",
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "The id of the user's cart.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "products": [
+                    {
+                      "id": 1,
+                      "product": {
+                        "name": "example_product1",
+                        "price": "$5.00",
+                        "qty": 1
+                      }
+                    }
+                  ],
+                  "total_price": "$5.00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to view a User's cart"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to view cart with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Cart with ID {cartId} not found"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Cart"
+        ]
+      },
+      "post": {
+        "summary": "Add items to cart",
+        "description": "Add products to a specific user's cart, if that user is the logged in user and return the changed cart information.  If product already exists in cart, increment quantity by specified amount. Returns updated cart.",
+        "operationId": "post_cart",
+        "requestBody": {
+          "description": "Product Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cart_update"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "products": [
+                    {
+                      "id": 1,
+                      "product": {
+                        "name": "example_product1",
+                        "price": "$5.00",
+                        "qty": 1
+                      }
+                    },
+                    {
+                      "id": 2,
+                      "product": {
+                        "name": "example_product2",
+                        "price": "$5.00",
+                        "qty": 1
+                      }
+                    }
+                  ],
+                  "total_price": "$10.00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to edit a User's cart"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to edit cart with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": {
+                  "Error_1": "Cart with ID {cartId} not found",
+                  "Error_2": "Product with ID {productId} not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Stock not available",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Quantity {qty} exceeds available stock"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Cart"
+        ]
+      },
+      "put": {
+        "summary": "Update item quantity in cart",
+        "description": "Updates the quantity of a product in a specific user's cart, if that user is the logged in user and return the changed cart information. Returns updated cart.",
+        "operationId": "put_cart",
+        "requestBody": {
+          "description": "Product Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cart_update"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "products": [
+                    {
+                      "id": 1,
+                      "product": {
+                        "name": "example_product1",
+                        "price": "$5.00",
+                        "qty": 1
+                      }
+                    },
+                    {
+                      "id": 2,
+                      "product": {
+                        "name": "example_product2",
+                        "price": "$5.00",
+                        "qty": 2
+                      }
+                    }
+                  ],
+                  "total_price": "$15.00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to edit a User's cart"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to edit cart with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": {
+                  "Error_1": "Cart with ID {cartId} not found",
+                  "Error_2": "Product with ID {productId} not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Stock not available",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Quantity {qty} exceeds available stock"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Cart"
+        ]
+      },
+      "delete": {
+        "summary": "Delete item from cart",
+        "description": "Delete products from a specific user's cart, if that user is the logged in user and return the changed cart information.",
+        "operationId": "delete_cart",
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "The id of the user's cart.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "product_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The id of the product to delete from the user's cart"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "products": [
+                    {
+                      "id": 1,
+                      "product": {
+                        "name": "example_product2",
+                        "price": "$5.00",
+                        "qty": 2
+                      }
+                    }
+                  ],
+                  "total_price": "$10.00"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to view a User's cart"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to edit cart with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Error_1": {
+                    "value": "Cart with ID {cartId} not found"
+                  },
+                  "Error_2": {
+                    "value": "Product with ID {productId} not found"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Cart"
+        ]
+      }
+    },
+    "/cart/{cartId}/checkout": {
+      "summary": "Checkout a user's cart",
+      "description": "Checkout a specific user's cart, if that user is the logged in user.  Verify payment, and upon success add products to an order.",
+      "post": {
+        "summary": "Checkout the user's cart",
+        "description": "Send payment information to the server which processes the payment, and adds the current cart items to a new order, then the cart is cleared. Returns newly created order.",
+        "operationId": "post_checkout",
+        "requestBody": {
+          "description": "Payment Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/checkout"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "The id of the user's cart.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "products": [
+                    {
+                      "id": 1,
+                      "product": {
+                        "name": "example_product2",
+                        "price": "$5.00",
+                        "qty": 2
+                      }
+                    }
+                  ],
+                  "total_price": "$10.00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing information",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please fill out all required fields"
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to place an order"
+              }
+            }
+          },
+          "402": {
+            "description": "Declined Payment",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Payment declined, please try another payment method"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to place an order on cart with that ID"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Cart"
+        ]
+      }
+    },
+    "/orders": {
+      "summary": "Order information",
+      "description": "View all orders",
+      "get": {
+        "summary": "Get list of orders",
+        "description": "Search the database for and return all orders made by the current user",
+        "operationId": "search_orders",
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "date": "2023/02/24",
+                    "total": "$15.00",
+                    "status": "shipped"
+                  },
+                  {
+                    "id": 2,
+                    "date": "2022/04/27",
+                    "total": "$100.00",
+                    "status": "delivered"
+                  },
+                  {
+                    "id": 3,
+                    "date": "2022/03/05",
+                    "total": "$35.00",
+                    "status": "canceled"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to view orders"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Order"
+        ]
+      }
+    },
+    "/orders/{orderId}": {
+      "summary": "Order information",
+      "description": "View all orders",
+      "get": {
+        "summary": "Get an order's details by id",
+        "description": "Search the database for and return all orders made by the current user",
+        "operationId": "search_order",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "The id of the user's order.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "date": "2023/02/24",
+                    "total": "$15.00",
+                    "status": "delivered",
+                    "products": [
+                      {
+                        "id": 1,
+                        "price": "$5.00",
+                        "qty": 2
+                      },
+                      {
+                        "id": 2,
+                        "price": "5.00",
+                        "qty": 1
+                      }
+                    ]
+                  },
+                  {
+                    "shipping_address": {
+                      "street": "1234 Example St. apt 2",
+                      "city": "Richmond",
+                      "state": "VA",
+                      "zip": 23173
+                    }
+                  },
+                  {
+                    "payment_information": {
+                      "card_number": "xxxx-xxxx-xxxx-1234",
+                      "billing_address": {
+                        "street": "1234 Example St. apt 2",
+                        "city": "Richmond",
+                        "state": "VA",
+                        "zip": 23173
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in to view an order"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to view the order with that ID"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "No order found with ID {orderId}"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Order"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "user_info": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User_Registration"
+        }
+      },
+      "user_login": {
+        "type": "object",
+        "properties": {
+          "username (or email)": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User_Login"
+        }
+      },
+      "user_update": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User_Registration"
+        }
+      },
+      "cart_update": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer"
+          },
+          "qty": {
+            "type": "integer"
+          }
+        },
+        "xml": {
+          "name": "Cart_Post"
+        }
+      },
+      "checkout": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "integer"
+          },
+          "payment_information": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 26,
+                "pattern": "[a-zA-Z0-9 .]*",
+                "example": "JOHN SMITH"
+              },
+              "card_number": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 22,
+                "pattern": "[0-9]*",
+                "example": "5001878976540310"
+              },
+              "cvv": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 5,
+                "pattern": "^[0-9]*$",
+                "example": "456"
+              },
+              "expiry": {
+                "type": "string",
+                "description": "Expiry Date of the card. Date Format: MM/YY",
+                "pattern": "^(0[1-9]|1[0-2])/[0-9]{2}$",
+                "example": "11/30"
+              }
+            }
+          },
+          "billing_address": {
+            "type": "object",
+            "properties": {
+              "addr_line_1": {
+                "type": "string"
+              },
+              "addr_line_2": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2,
+                "pattern": "[A-Z]*",
+                "example": "CO"
+              },
+              "zip_code": {
+                "type": "string",
+                "minLength": 5,
+                "maxLength": 5,
+                "pattern": "[0-9]*"
+              },
+              "is_shipping": {
+                "type": "boolean"
+              }
+            }
+          },
+          "shipping_address": {
+            "type": "object",
+            "properties": {
+              "addr_line_1": {
+                "type": "string"
+              },
+              "addr_line_2": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2,
+                "pattern": "[A-Z]*",
+                "example": "CO"
+              },
+              "zip_code": {
+                "type": "string",
+                "minLength": 5,
+                "maxLength": 5,
+                "pattern": "[0-9]*"
+              }
+            }
+          },
+          "shipping_method": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
