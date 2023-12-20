@@ -6,7 +6,7 @@ const registerRouter = express.Router();
 
 registerRouter.post('/', async (req, res, next) => {
     //Implement Post to add a new user
-    const user = req.body.user;
+    const user = req.body;
     try {
         if(!user.username || !user.email || !user.first_name || !user.last_name || !user.password) {
             const error = new Error('Please fill in all required fields!');
@@ -14,9 +14,12 @@ registerRouter.post('/', async (req, res, next) => {
             return next(error);
         }
 
-        const existingUser = await db.users.findUser(user.username);
+        const existingUser = await db.users.findUser(user.username, (err, user) => {
+            if(err) return next(err);
+            return user;
+        });
 
-        if(!existingUser) {
+        if(existingUser) {
             const error = new Error('User with that username or email already exists!');
             error.status = 422;
             return next(error);
