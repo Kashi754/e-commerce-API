@@ -10,35 +10,29 @@ exports.seed = async function(knex) {
         {
             name: 'Bacon Wrapped Steak',
             price: '$30',
-            description: 'A 12oz black angus ribey steak wrapped in 1lb of hickory smoked bacon',
-            category: 'Food',
+            description: 'A 12oz black angus ribey steak wrapped in 1lb of hickory smoked bacon'
         },
         {
             name: 'Smith & Wesson Model 19',
             price: '$1000',
-            description: '357 Magnum, 6 Shot, Double Action Revolver With Walnut Grips, and Blued Finish.',
-            category: 'Firearms',
+            description: '357 Magnum, 6 Shot, Double Action Revolver With Walnut Grips, and Blued Finish.'
         },
         {
             name: 'Sex Panther Cologne Spray',
             price: '$40',
-            description: "It's called Sex Panther by Odeon. It's made with bits of real panther, so you know it's good. They've done studies, you know. Sixty percent of the time, it works every time.",
-            category: 'Fragrances',
+            description: "It's called Sex Panther by Odeon. It's made with bits of real panther, so you know it's good. They've done studies, you know. Sixty percent of the time, it works every time."
         },
         {
             name: 'Test Item 4',
-            price: '$100',
-            category: 'Test',
+            price: '$100'
         },
         {
             name: 'Test Item 5',
-            price: '$5.50',
-            category: 'Test',
+            price: '$5.50'
         },
         {
             name: 'Test Item 6',
-            price: '$89.99',
-            category: 'Test',
+            price: '$89.99'
         },
     ]);
 };

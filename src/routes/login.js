@@ -1,9 +1,12 @@
 const express = require('express');
+const passport = require('passport');
 
 const loginRouter = express.Router();
 
-loginRouter.post('/', (req, res, next) => {
-    //Implement Post for user login
+loginRouter.post('/', passport.authenticate('local'),
+(req, res, next) => {
+    const user = req.user;
+    res.send(user);
 });
 
 
