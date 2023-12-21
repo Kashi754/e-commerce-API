@@ -19,7 +19,7 @@ usersRouter.get('/:userId', async (req, res, next) => {
     }
     await users.findUserById(userId, (err, user) => {
         if(err) return next(err);
-        res.send(user);
+        res.json(user);
     });
 });
 
@@ -40,7 +40,7 @@ usersRouter.put('/:userId', async (req, res, next) => {
     }
     await users.editUserById(userId, user, (err, updatedUser) => {
         if(err) return next(err);
-        res.status(201).send(updatedUser);
+        res.status(201).json(updatedUser);
     });
 });
 

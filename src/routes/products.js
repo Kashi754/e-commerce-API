@@ -20,13 +20,13 @@ productsRouter.get('/', async (req, res, next) => {
         console.log(searchTerm);
         products.getAllProducts(filters, (err, results) => {
             if(err) return next(err);
-            res.send(results);
+            res.json(results);
         });
     }
 
     products.findProductsByFilter(searchTerm, filters, categoryId, (err, results) => {
         if(err) return next(err);
-            res.send(results);
+            res.json(results);
     });
 });
 
@@ -39,7 +39,7 @@ productsRouter.get('/:productId', (req, res, next) => {
     }
     const results = products.findProductsById(productId, (err, results) => {
         if(err) return next(err);
-            res.send(results);
+            res.json(results);
     });
 });
 

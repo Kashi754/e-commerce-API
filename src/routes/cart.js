@@ -38,7 +38,7 @@ cartRouter.get('/:cartId', verifyUserCart, async (req, res, next) => {
 
     await cart.getCartById(req.cartId, (err, results) => {
         if(err) return next(err);
-        res.send(results);
+        res.json(results);
     });
 });
 
