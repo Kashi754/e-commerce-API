@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../db/db');
+const users = require('../db/db').users;
 const bcrypt = require('bcrypt');
 
 const registerRouter = express.Router();
@@ -14,7 +14,7 @@ registerRouter.post('/', async (req, res, next) => {
             return next(error);
         }
 
-        const existingUser = await db.users.findUser(user.username, (err, user) => {
+        const existingUser = await users.findUser(user.username, (err, user) => {
             if(err) return next(err);
             return user;
         });
@@ -31,15 +31,15 @@ registerRouter.post('/', async (req, res, next) => {
         user.password_hash = hash;
         delete user.password;
 
-        try {
-            await db.users.createUser(user);
-            res.status(201).send("Success! New User Created.")
-        } catch(err) {
-            err.status = 500;
-            return next(err);
-        }
+
+        await users.createUser(user, (err, user) => {
+            if(err) return next(err);
+            res.status(201).send("Success! New User Created");   
+        });
+        
             
     } catch(err) {
+        err.status = 500;
         return next(err);
     }
 

@@ -54,13 +54,13 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "A successful response",
             "content": {
               "text/plain; charset=utf-8": {
                 "example": {
                   "Message": {
-                    "value": "Success"
+                    "value": "Success! New User Created"
                   }
                 }
               }
@@ -70,7 +70,7 @@
             "description": "Missing Required Information (username, email, password, first name, last name)",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Missing Required Information: USERNAME"
+                "example": "Please fill in all required fields"
               }
             }
           },
@@ -100,7 +100,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/user_login"
+                "anyOf": [
+                  {"$ref": "#/components/schemas/username_login"},
+                  {"$ref": "#/components/schemas/email_login"}
+                ]
               }
             }
           }
@@ -111,7 +114,7 @@
             "content": {
               "application/json": {
                 "example": {
-                  "user_id": 1
+                  "user": 1
                 }
               }
             }
@@ -120,7 +123,7 @@
             "description": "Incorrect Password",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Incorrect Password"
+                "example": "Unauthorized"
               }
             }
           },
@@ -128,7 +131,29 @@
             "description": "User not found",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "User with username or email {user} does not exist"
+                "example": "User with username {username} not found!"
+              }
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/logout": {
+      "summary": "Log out from user",
+      "description": "This path is used to Log out of the API",
+      "get": {
+        "summary": "Log out from User",
+        "description": "Send logout request to the server",
+        "operationId": "logout_user",
+        "responses": {
+          "204": {
+            "description": "A successful response",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Successfully logged out!"
               }
             }
           }
@@ -162,16 +187,12 @@
             "content": {
               "application/json": {
                 "example": {
-                  "id": {
-                    "userId": null
-                  },
-                  "user": {
-                    "username": "test_user",
-                    "email": "john_doe@email.com",
-                    "first_name": "John",
-                    "last_name": "Doe",
-                    "cart_id": 1
-                  }
+                  "id": 1,
+                  "username": "test_user",
+                  "email": "john_doe@email.com",
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "cart_id": 1
                 }
               }
             }
@@ -180,7 +201,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to view a User's information"
+                "example": "Please log in to view a Users information"
               }
             }
           },
@@ -188,7 +209,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to view user with that ID"
+                "example": "You do not have permission to view User with that ID"
               }
             }
           },
@@ -236,13 +257,11 @@
             "content": {
               "application/json": {
                 "example": {
-                  "id": "provided userId",
-                  "user": {
+                    "id": 1,
                     "username": "test_user,",
                     "email": "john_doe@email.com",
                     "first_name": "John,",
                     "last_name": "Doe"
-                  }
                 }
               }
             }
@@ -251,7 +270,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to edit a User's information"
+                "example": "Please log in to edit a Users information!"
               }
             }
           },
@@ -259,7 +278,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to edit user with that ID"
+                "example": "You do not have permission to edit User with that ID!"
               }
             }
           },
@@ -282,9 +301,17 @@
       "description": "Search for products",
       "get": {
         "summary": "Search for products",
-        "description": "Search the database by category, category_name, product_name, or price and return results",
+        "description": "Search the database by category_name, product_name and product_description and return results.  If search term is not provided, returns all products.  Can be filtered by price ",
         "operationId": "search_products",
         "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The search term for the product or category to search for"
+          },
           {
             "in": "query",
             "name": "categoryId",
@@ -292,22 +319,6 @@
               "type": "integer"
             },
             "description": "The id of the category to search for"
-          },
-          {
-            "in": "query",
-            "name": "category_name",
-            "schema": {
-              "type": "string"
-            },
-            "description": "The name of the category to search for"
-          },
-          {
-            "in": "query",
-            "name": "product_name",
-            "schema": {
-              "type": "string"
-            },
-            "description": "The name of the product to search for"
           },
           {
             "in": "query",
@@ -1011,10 +1022,10 @@
           "name": "User_Registration"
         }
       },
-      "user_login": {
+      "username_login": {
         "type": "object",
         "properties": {
-          "username (or email)": {
+          "username": {
             "type": "string"
           },
           "password": {
@@ -1022,7 +1033,21 @@
           }
         },
         "xml": {
-          "name": "User_Login"
+          "name": "Username_Login"
+        }
+      },
+      "email_login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "email_Login"
         }
       },
       "user_update": {

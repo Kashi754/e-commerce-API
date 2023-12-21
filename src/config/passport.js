@@ -1,14 +1,14 @@
 const passport = require('passport');
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
-const db = require('../db/db');
+const users = require('../db/db').users;
 
 passport.use(new LocalStrategy(
     async function (username, password, done) {
-        await db.users.findUserAuth(username, (err, user) => {
+        await users.findUserAuth(username, async (err, user) => {
             if(err) return done(err);
             if(!user) return done(null, false);
-            const matchedPassword = bcrypt.compare(password, user.password_hash);
+            const matchedPassword = await bcrypt.compare(password, user.password_hash);
             if(!matchedPassword) return done(null, false);
 
             console.log(`Successfully logged in as ${user.username}`)
@@ -22,7 +22,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-    await db.users.findUserById(id,
+    await users.findUserById(id,
         function (err, user) {
             if(err) return done(err);
             return done(null, user);

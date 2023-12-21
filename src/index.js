@@ -44,7 +44,7 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            maxAge: 10000, //ten seconds, for testing
+            maxAge: 1000 * 60 * 5, //5 minutes, for testing
         },
         store
     })

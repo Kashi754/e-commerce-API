@@ -13,6 +13,8 @@ const apiRouter = express.Router();
 apiRouter.use('/register', registerRouter);
 apiRouter.use('/login', loginRouter);
 apiRouter.use('/logout', logoutRouter);
+apiRouter.use('/users', usersRouter);
+apiRouter.use('/products', productsRouter);
 apiRouter.get('/openapi.json', (req, res, next) => {
     res.json(openApi);
 });
