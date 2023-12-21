@@ -156,6 +156,15 @@
                 "example": "Successfully logged out!"
               }
             }
+          },
+
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in!"
+              }
+            }
           }
         },
         "tags": [
@@ -201,7 +210,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to view a Users information"
+                "example": "Please log in!"
               }
             }
           },
@@ -270,7 +279,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to edit a Users information!"
+                "example": "Please log in!"
               }
             }
           },
@@ -345,21 +354,18 @@
                 "example": [
                   {
                     "id": 1,
-                    "product": {
-                      "name": "example_product1",
-                      "price": "$5.00",
-                      "description": "Description",
-                      "qty_in_stock": 100
-                    }
+                    "name": "example_product1",
+                    "price": "$5.00",
+                    "description": "Description",
+                    "qty_in_stock": 100
+                    
                   },
                   {
                     "id": 2,
-                    "product": {
-                      "name": "example_product2",
-                      "price\"": "$5.00",
-                      "description\"": "Description",
-                      "qty_in_stock\"": 100
-                    }
+                    "name": "example_product2",
+                    "price\"": "$5.00",
+                    "description\"": "Description",
+                    "qty_in_stock\"": 100
                   }
                 ]
               }
@@ -404,12 +410,10 @@
               "application/json": {
                 "example": {
                   "id": "{productId}",
-                  "product": {
-                    "name": "example_product",
-                    "price": "$5.00",
-                    "description": "This is a description of the product",
-                    "qty_in_stock": 100
-                  }
+                  "name": "example_product",
+                  "price": "$5.00",
+                  "description": "This is a description of the product",
+                  "qty_in_stock": 100
                 }
               }
             }
@@ -469,7 +473,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to view a User's cart"
+                "example": "Please log in!"
               }
             }
           },
@@ -528,19 +532,15 @@
                   "products": [
                     {
                       "id": 1,
-                      "product": {
-                        "name": "example_product1",
-                        "price": "$5.00",
-                        "qty": 1
-                      }
+                      "name": "example_product1",
+                      "price": "$5.00",
+                      "qty": 1
                     },
                     {
                       "id": 2,
-                      "product": {
-                        "name": "example_product2",
-                        "price": "$5.00",
-                        "qty": 1
-                      }
+                      "name": "example_product2",
+                      "price": "$5.00",
+                      "qty": 1
                     }
                   ],
                   "total_price": "$10.00"
@@ -552,7 +552,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to edit a User's cart"
+                "example": "Please log in!"
               }
             }
           },
@@ -622,19 +622,15 @@
                   "products": [
                     {
                       "id": 1,
-                      "product": {
-                        "name": "example_product1",
-                        "price": "$5.00",
-                        "qty": 1
-                      }
+                      "name": "example_product1",
+                      "price": "$5.00",
+                      "qty": 1
                     },
                     {
                       "id": 2,
-                      "product": {
-                        "name": "example_product2",
-                        "price": "$5.00",
-                        "qty": 2
-                      }
+                      "name": "example_product2",
+                      "price": "$5.00",
+                      "qty": 2
                     }
                   ],
                   "total_price": "$15.00"
@@ -646,7 +642,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to edit a User's cart"
+                "example": "Please log in!"
               }
             }
           },
@@ -714,11 +710,9 @@
                   "products": [
                     {
                       "id": 1,
-                      "product": {
-                        "name": "example_product2",
-                        "price": "$5.00",
-                        "qty": 2
-                      }
+                      "name": "example_product2",
+                      "price": "$5.00",
+                      "qty": 2
                     }
                   ],
                   "total_price": "$10.00"
@@ -730,7 +724,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to view a User's cart"
+                "example": "Please log in!"
               }
             }
           },
@@ -800,11 +794,9 @@
                   "products": [
                     {
                       "id": 1,
-                      "product": {
-                        "name": "example_product2",
-                        "price": "$5.00",
-                        "qty": 2
-                      }
+                      "name": "example_product2",
+                      "price": "$5.00",
+                      "qty": 2
                     }
                   ],
                   "total_price": "$10.00"
@@ -824,7 +816,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to place an order"
+                "example": "Please log in!"
               }
             }
           },
@@ -889,7 +881,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to view orders"
+                "example": "Please log in!"
               }
             }
           }
@@ -968,7 +960,7 @@
             "description": "Not logged in",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "Please log in to view an order"
+                "example": "Please log in!"
               }
             }
           },
