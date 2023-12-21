@@ -11,7 +11,7 @@ module.exports = {
     findUserById: async (id, done) => {
         //search database for user by id
         try {
-            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name')
+            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'role')
                 .from('user')
                 .where('id', id)
             if(!user) {
@@ -45,7 +45,7 @@ module.exports = {
 
     findUserAuth: async(userName, done) => {
         try {
-            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'password_hash')
+            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash')
                 .from('user')
                 .where('username', userName);
             if(!user) {

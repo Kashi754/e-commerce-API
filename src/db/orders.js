@@ -7,14 +7,6 @@ import 'dotenv/config';
 
 const knex = require('knex')(configOptions);
 
-function processPayment (paymentInformation, billingAddr, totalPrice) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({paymentSuccessful: true, provider: 'Visa'});
-        }, 2000)
-    });
-}
-
 module.exports = {
     getUserForOrder: async (id, done) => {
         try {

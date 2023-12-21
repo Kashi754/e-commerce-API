@@ -18,14 +18,12 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, {
+        id: user.id, 
+        role: user.role
+    });
 });
 
-passport.deserializeUser(async (id, done) => {
-    await users.findUserById(id,
-        function (err, user) {
-            if(err) return done(err);
-            return done(null, user);
-        }
-    )
+passport.deserializeUser(async (user, done) => {
+    return done(null, user);
 });

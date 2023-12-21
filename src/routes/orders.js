@@ -15,7 +15,7 @@ async function verifyUserOrder(req, res, next) {
     await orders.getUserForOrder(orderId, (err, userId) => {
         if(err) return next(err);
         
-        if(req.session.passport.user != userId) {
+        if(req.user.id != userId && req.user.role != 'admin') {
             const error = new Error("You do not have permission to interact with order with that ID!");
             error.status = 403;
             return next(error);
@@ -27,14 +27,16 @@ async function verifyUserOrder(req, res, next) {
 }
 
 ordersRouter.get('/', async (req, res, next) => {
-    await orders.getOrdersForUser(req.session.passport.user, (err, orders) => {
+    const userId = req.query.userId || req.user.id;
+    await orders.getOrdersForUser(userId, (err, orders) => {
         if(err) return next(err);
         res.json(orders);
     });
 });
 
 ordersRouter.get('/:orderId', verifyUserOrder, async (req, res, next) => {
-    await orders.getOrderById(req.orderId, req.session.passport.user, (err, order) => {
+    const userId = req.query.userId || req.user.id;
+    await orders.getOrderById(req.orderId, userId, (err, order) => {
         if(err) return next(err);
         res.json(order);
     });

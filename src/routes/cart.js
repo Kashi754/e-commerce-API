@@ -15,7 +15,7 @@ async function verifyUserCart(req, res, next) {
     await cart.getUserForCart(cartId, (err, userId) => {
         if(err) return next(err);
         
-        if(req.session.passport.user != userId) {
+        if(req.user.id != userId && req.user.role !== 'admin') {
             const error = new Error("You do not have permission to interact with cart with that ID!");
             error.status = 403;
             return next(error);
@@ -27,7 +27,6 @@ async function verifyUserCart(req, res, next) {
 }
 
 cartRouter.get('/:cartId', verifyUserCart, async (req, res, next) => {
-
     await cart.getCartById(req.cartId, (err, cart) => {
         if(err) return next(err);
         res.json(cart);

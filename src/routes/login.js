@@ -5,7 +5,7 @@ const loginRouter = express.Router();
 
 loginRouter.post('/', passport.authenticate('local'),
 (req, res, next) => {
-    const user = req.session.passport;
+    const user = req.user;
     res.json(user);
 });
 
