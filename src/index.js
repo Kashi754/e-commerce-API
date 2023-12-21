@@ -55,7 +55,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Router
-const apiRouter = require('./routes/index');
+const apiRouter = require('./routes/apiRouter');
 app.use('/', apiRouter);
 
 // ErrorHandler

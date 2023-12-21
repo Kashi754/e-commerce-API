@@ -17,7 +17,6 @@ productsRouter.get('/', async (req, res, next) => {
     }
     
     if(!searchTerm && !categoryId) {
-        console.log(searchTerm);
         products.getAllProducts(filters, (err, results) => {
             if(err) return next(err);
             res.json(results);

@@ -11,5 +11,6 @@ module.exports = {
     knex: knex,
     users: require('./users'),
     products: require('./products'),
-    cart: require('./cart')
+    cart: require('./cart'),
+    orders: require('./orders')
 }

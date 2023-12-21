@@ -209,13 +209,13 @@ module.exports = {
             }
 
             // TODO: CHECK DATABASE FOR EXISTING ADDRESS //
-            let database_address = await knex('address')
+            const database_address = await knex('address')
                 .where('user_id', '=', shippingAddress.user_id)
                 .where('addr_line_1', '=', shippingAddress.addr_line_1)
                 .where('city', '=', shippingAddress.city)
                 .first('id');
 
-            const shipping_address_id = database_address.id || (await knex('address')
+            const shipping_address_id = database_address?.id || (await knex('address')
                 .insert(shippingAddress, ['id']))[0].id;
             
             // Add shipping details to the database and get details_id
@@ -244,7 +244,6 @@ module.exports = {
             await knex('order_items')
                 .insert(cartItems);
 
-            console.log(orderId);
             const products = await knex('product')
                 .join('order_items', 'product.id', '=', 'order_items.product_id')
                 .where('order_items.order_id', '=', orderId[0].id)

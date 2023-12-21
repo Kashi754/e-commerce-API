@@ -25,6 +25,7 @@ apiRouter.use('/logout', verifyUserLoggedIn, logoutRouter);
 apiRouter.use('/users', verifyUserLoggedIn, usersRouter);
 apiRouter.use('/products', productsRouter);
 apiRouter.use('/cart', verifyUserLoggedIn, cartRouter);
+apiRouter.use('/orders', verifyUserLoggedIn, ordersRouter);
 apiRouter.get('/openapi.json', (req, res, next) => {
     res.json(openApi);
 });

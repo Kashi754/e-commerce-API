@@ -15,7 +15,7 @@ module.exports = {
                 .from('user')
                 .where('id', id)
             if(!user) {
-                const error = new Error(`User with id ${id}not found`);
+                const error = new Error(`User with id ${id} not found`);
                 error.status = 404;
                 return done(error);
             }
@@ -68,7 +68,7 @@ module.exports = {
                 const error = new Error('User not created!');
                 return done(error)
             }
-            console.log(`User ${user.id} created with username: ${user.username} and email: ${user.email}!`);
+            console.log(`User created with username: ${user.username} and email: ${user.email}!`);
             return done(null, newUser);
         } catch(err) {
             return done(err)

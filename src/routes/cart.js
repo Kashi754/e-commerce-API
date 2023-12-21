@@ -16,9 +16,7 @@ async function verifyUserCart(req, res, next) {
         if(err) return next(err);
         
         if(req.session.passport.user != userId) {
-            console.log(req.session.passport.user);
-            console.log(userId);
-            const error = new Error("You do not have permission to view cart with that ID!");
+            const error = new Error("You do not have permission to interact with cart with that ID!");
             error.status = 403;
             return next(error);
         }
