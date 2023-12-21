@@ -36,36 +36,33 @@ cartRouter.get('/:cartId', verifyUserCart, async (req, res, next) => {
     });
 });
 
-cartRouter.post('/', async (req, res, next) => {
-    const userId = req.session.passport.user;
+cartRouter.post('/:cartId', verifyUserCart, async (req, res, next) => {
     const itemData = req.body;
 
-    await cart.addItemToCart(userId, itemData, async (err, cartId) => {
+    await cart.addItemToCart(req.cartId, itemData, async (err) => {
         if(err) return next(err);
 
-        await cart.getCartById(cartId, (err, cart) => {
+        await cart.getCartById(req.cartId, (err, cart) => {
             if(err) return next(err);
             res.json(cart);
         });
     });
 });
 
-cartRouter.put('/', async (req, res, next) => {
-    const userId = req.session.passport.user;
+cartRouter.put('/:cartId', verifyUserCart, async (req, res, next) => {
     const itemData = req.body;
 
-    await cart.editCartProduct(userId, itemData, async (err, cartId) => {
+    await cart.editCartProduct(req.cartId, itemData, async (err) => {
         if(err) return next(err);
 
-        await cart.getCartById(cartId, (err, cart) => {
+        await cart.getCartById(req.cartId, (err, cart) => {
             if(err) return next(err);
             res.json(cart);
         });
     })
 });
 
-cartRouter.delete('/', async (req, res, next) => {
-    const userId = req.session.passport.user;
+cartRouter.delete('/:cartId', verifyUserCart, async (req, res, next) => {
     const productId = Number(req.query.product_id);
 
     if(!productId) {
@@ -74,18 +71,22 @@ cartRouter.delete('/', async (req, res, next) => {
         return next(error);
     }
 
-    await cart.deleteCartProduct(userId, productId, async (err, cartId) => {
+    await cart.deleteCartProduct(req.cartId, productId, async (err) => {
         if(err) return next(err);
 
-        await cart.getCartById(cartId, (err, cart) => {
-            if(err) return next(err);
+        await cart.getCartById(req.cartId, (err, cart) => {
+            if(err) return next(err, cart);
             res.json(cart);
         });
     });
 });
 
-cartRouter.post('/checkout', (req, res, next) => {
-    //Implement Post to checkout a user
+cartRouter.post('/:cartId/checkout', verifyUserCart, async (req, res, next) => {
+    await cart.checkoutCart(req.cartId, req.body, async (err, response) => {
+        if(err) return next(err);
+
+        res.json(response);
+    })
 });
 
 module.exports = cartRouter;

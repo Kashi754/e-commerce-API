@@ -1077,9 +1077,6 @@
       "checkout": {
         "type": "object",
         "properties": {
-          "user_id": {
-            "type": "integer"
-          },
           "payment_information": {
             "type": "object",
             "properties": {
