@@ -7,11 +7,6 @@ usersRouter.get('/:userId', async (req, res, next) => {
     //Implement Get for a user's information
     const userId = req.params.userId;
 
-    if(!req.session.passport?.user) {
-        const error = new Error("Please log in to view a Users information!");
-        error.status = 401;
-        return next(error);
-    }
     if(req.session.passport.user != userId) {
         const error = new Error("You do not have permission to view User with that ID!");
         error.status = 403;
@@ -28,11 +23,6 @@ usersRouter.put('/:userId', async (req, res, next) => {
     const userId = req.params.userId;
     const user = req.body;
 
-    if(!req.session.passport?.user) {
-        const error = new Error("Please log in to edit a Users information!");
-        error.status = 401;
-        return next(error);
-    }
     if(req.session.passport.user != userId) {
         const error = new Error("You do not have permission to edit User with that ID!");
         error.status = 403;

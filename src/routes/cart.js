@@ -12,12 +12,6 @@ async function verifyUserCart(req, res, next) {
         return next(error);
     }
 
-    if(!req.session.passport?.user) {
-        const error = new Error("Please log in to view a User's cart!");
-        error.status = 401;
-        return next(error);
-    }
-
     await cart.getUserForCart(cartId, (err, userId) => {
         if(err) return next(err);
         
@@ -36,22 +30,58 @@ async function verifyUserCart(req, res, next) {
 
 cartRouter.get('/:cartId', verifyUserCart, async (req, res, next) => {
 
-    await cart.getCartById(req.cartId, (err, results) => {
+    await cart.getCartById(req.cartId, (err, cart) => {
         if(err) return next(err);
-        res.json(results);
+        res.json(cart);
     });
 });
 
-cartRouter.post('/', (req, res, next) => {
-    //Implement Post to add items to user's cart
+cartRouter.post('/', async (req, res, next) => {
+    const userId = req.session.passport.user;
+    const itemData = req.body;
+
+    await cart.addItemToCart(userId, itemData, async (err, cartId) => {
+        if(err) return next(err);
+
+        await cart.getCartById(cartId, (err, cart) => {
+            if(err) return next(err);
+            res.json(cart);
+        });
+    });
 });
 
-cartRouter.put('/', (req, res, next) => {
-    //Implement Put to edit item quantity in user's cart
+cartRouter.put('/', async (req, res, next) => {
+    const userId = req.session.passport.user;
+    const itemData = req.body;
+
+    await cart.editCartProduct(userId, itemData, async (err, cartId) => {
+        if(err) return next(err);
+
+        await cart.getCartById(cartId, (err, cart) => {
+            if(err) return next(err);
+            res.json(cart);
+        });
+    })
 });
 
-cartRouter.delete('/', (req, res, next) => {
-    //Implement Delete to remove items from user's cart
+cartRouter.delete('/', async (req, res, next) => {
+    const userId = req.session.passport.user;
+    const productId = Number(req.query.product_id);
+
+    if(!productId) {
+        const error = new Error('Please input a number for the product ID!');
+        error.status = 400;
+        return next(error);
+    }
+
+    await cart.deleteCartProduct(userId, productId, async (err, cartId) => {
+        if(err) return next(err);
+
+        await cart.getCartById(cartId, (err, cart) => {
+            if(err) return next(err);
+            res.json(cart);
+        });
+    });
 });
 
 cartRouter.post('/checkout', (req, res, next) => {

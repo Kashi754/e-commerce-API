@@ -14,16 +14,10 @@ registerRouter.post('/', async (req, res, next) => {
             return next(error);
         }
 
-        const existingUser = await users.findUser(user.username, (err, user) => {
+        await users.findUser(user.username, (err, user) => {
             if(err) return next(err);
             return user;
         });
-
-        if(existingUser) {
-            const error = new Error('User with that username or email already exists!');
-            error.status = 422;
-            return next(error);
-        } 
         
         const SALT_ROUNDS = 10;
         const salt = await bcrypt.genSalt(SALT_ROUNDS);

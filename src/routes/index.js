@@ -10,12 +10,21 @@ const ordersRouter = require('./orders');
 
 const apiRouter = express.Router();
 
+const verifyUserLoggedIn = (req, res, next) => {
+    if(!req.session.passport?.user) {
+        const error = new Error("Please log in!");
+        error.status = 401;
+        return next(error);
+    }
+    next();
+}
+
 apiRouter.use('/register', registerRouter);
 apiRouter.use('/login', loginRouter);
-apiRouter.use('/logout', logoutRouter);
-apiRouter.use('/users', usersRouter);
+apiRouter.use('/logout', verifyUserLoggedIn, logoutRouter);
+apiRouter.use('/users', verifyUserLoggedIn, usersRouter);
 apiRouter.use('/products', productsRouter);
-apiRouter.use('/cart', cartRouter);
+apiRouter.use('/cart', verifyUserLoggedIn, cartRouter);
 apiRouter.get('/openapi.json', (req, res, next) => {
     res.json(openApi);
 });
