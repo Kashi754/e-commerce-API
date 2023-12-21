@@ -15,6 +15,7 @@ apiRouter.use('/login', loginRouter);
 apiRouter.use('/logout', logoutRouter);
 apiRouter.use('/users', usersRouter);
 apiRouter.use('/products', productsRouter);
+apiRouter.use('/cart', cartRouter);
 apiRouter.get('/openapi.json', (req, res, next) => {
     res.json(openApi);
 });

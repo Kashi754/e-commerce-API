@@ -455,11 +455,9 @@
                   "products": [
                     {
                       "id": 1,
-                      "product": {
-                        "name": "example_product1",
-                        "price": "$5.00",
-                        "qty": 1
-                      }
+                      "name": "example_product1",
+                      "price": "$5.00",
+                      "qty": 1
                     }
                   ],
                   "total_price": "$5.00"

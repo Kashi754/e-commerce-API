@@ -34,10 +34,10 @@ module.exports = {
                     .from('user')
                     .where('username', userString)
                     .orWhere('email', userString);
-                if(!user) {
-                    const error = new Error(`User with username or email ${userString} not found`);
-                    error.status = 404;
-                    return done(error);
+                if(user) {
+                    const error = new Error('User with that username or email already exists!');
+                    error.status = 422;
+                    return next(error);
                 }
                 done(null, user)
             } catch(err) {
@@ -190,6 +190,49 @@ module.exports = {
                 }
     
                 done(null, results);
+        }
+    },
+
+    cart: {
+        getUserForCart: async (id, done) => {
+            const user = await knex('user')
+                .join('cart', 'user.id', '=', 'cart.user_id')
+                .where('cart.id', '=', id)
+                .first({ userId: 'user.id' });
+
+            if(!user) {
+                const error = new Error(`User with cart ID ${id} not found!`);
+                error.status = 404;
+                return done(error);
+            }
+
+            done(null, user.userId);
+        },
+
+        getCartById: async (cartId, done) => {
+            const products = await knex('product')
+                .join('cart_product', 'product.id', '=', 'cart_product.product_id')
+                .join('cart', 'cart_product.cart_id', '=', 'cart.id')
+                .where('cart.id', '=', cartId)
+                .select({
+                    id: 'product.id',
+                    name: 'product.name',
+                    price: 'product.price',
+                    qty: 'cart_product.quantity'
+                })
+
+            const total = await knex('cart')
+                .where('id', '=', cartId)
+                .first('total_price')
+
+            if(products.length < 1 && !total) {
+                const error = new Error(`Cart with ID ${cartId} not found`);
+                error.status = 404;
+                done(error);
+            }
+
+            const response = { products, total };
+            done(null, response);
         }
     }
 }
