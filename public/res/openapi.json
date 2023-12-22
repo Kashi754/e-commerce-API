@@ -490,7 +490,7 @@
       },
       "patch": {
         "summary": "Edit product's information",
-        "description": "Edit information for a specific product and return the changed product information.",
+        "description": "Allows a user with the 'admin' role to edit information for a specific product and return the changed product information.",
         "operationId": "put_product",
         "requestBody": {
           "description": "Product Information",
