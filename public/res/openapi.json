@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "description": "An api for interacting with an E-Commerce server.",
+    "description": "An api for interacting with an E-Commerce server.\n\n### Admin user info:\n##### Username | 'admin'\n##### Password | 'password'",
     "version": "1.0.0",
     "title": "Online E-Commerce API",
     "contact": {
@@ -383,6 +383,63 @@
         "tags": [
           "Products"
         ]
+      },
+      "post": {
+        "summary": "Insert new products into the database",
+        "description": "Allows a user with the 'admin' role to add new products to the database.",
+        "operationId": "post_products",
+        "requestBody": {
+          "description": "Product Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/product_update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "example_product1",
+                    "price": "$5.00",
+                    "description": "Description",
+                    "qty_in_stock": 100,
+                    "categories": [
+                      "electronics",
+                      "computers",
+                      "accessories"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in!"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to do that."
+              }
+            }
+          }
+        },
+        "tags": [
+          "Products"
+        ]
       }
     },
     "/products/{productId}": {
@@ -415,6 +472,82 @@
                   "description": "This is a description of the product",
                   "qty_in_stock": 100
                 }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Product with ID {productId} not found"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Products"
+        ]
+      },
+      "patch": {
+        "summary": "Edit product's information",
+        "description": "Edit information for a specific product and return the changed product information.",
+        "operationId": "put_product",
+        "requestBody": {
+          "description": "Product Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/product_update"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "The id of the product.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "example_product1",
+                    "price": "$5.00",
+                    "description": "Description",
+                    "qty_in_stock": 100,
+                    "categories": [
+                      "electronics",
+                      "computers",
+                      "accessories"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in!"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "You do not have permission to do that."
               }
             }
           },
@@ -481,7 +614,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to view cart with that ID"
+                "example": "You do not have permission to interact with cart with that ID!"
               }
             }
           },
@@ -560,7 +693,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to edit cart with that ID"
+                "example": "You do not have permission to interact with cart with that ID!"
               }
             }
           },
@@ -650,7 +783,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to edit cart with that ID"
+                "example": "You do not have permission to interact with cart with that ID!"
               }
             }
           },
@@ -732,7 +865,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to edit cart with that ID"
+                "example": "You do not have permission to interact with cart with that ID!"
               }
             }
           },
@@ -832,7 +965,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to place an order on cart with that ID"
+                "example": "You do not have permission to interact with cart with that ID!"
               }
             }
           }
@@ -968,7 +1101,7 @@
             "description": "Unauthorized",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "You do not have permission to view the order with that ID"
+                "example": "You do not have permission to interact with order with that ID!"
               }
             }
           },
@@ -1058,6 +1191,32 @@
         },
         "xml": {
           "name": "User_Registration"
+        }
+      },
+      "product_update": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "category_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "xml": {
+          "name": "product_inventory"
         }
       },
       "cart_update": {

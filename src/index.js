@@ -10,7 +10,7 @@ const session = require('express-session');
 require('./config/passport');
 
 //import last
-import 'dotenv/config';
+require('dotenv').config();
 
 const app = express();
 

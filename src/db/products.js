@@ -2,10 +2,9 @@ const knexfile = require('../../knexfile');
 
 const env = process.env.NODE_ENV || 'development';
 const configOptions = knexfile[env];
-
-import 'dotenv/config';
-
 const knex = require('knex')(configOptions);
+require('dotenv').config();
+
 
 module.exports = {
     getAllProducts: async (filters, done) => {
@@ -106,5 +105,135 @@ module.exports = {
         } catch (err) {
             done(err);
         }
+    },
+
+    addProductToDatabase: async (product, quantity, categoryIds, done) => {
+        try {
+            const results = await knex('product')
+                .returning(['id', 'name', 'price', 'description', 'inventory_id'])
+                .insert(product);
+
+            const { inventory_id, ...response } = results[0];
+
+            const qty = await knex('product_inventory')
+                .where('id', inventory_id)
+                .update({ quantity }, ['quantity']);
+
+            response.qty_in_stock = qty[0].quantity;
+
+            let categories = [];
+
+            if(categoryIds.length > 0) {
+                const categoryArray = [];
+
+                for(const category_id of categoryIds) {
+                    categoryArray.push({ category_id, product_id: response.id });
+                }
+
+                await knex('product_category')
+                .insert(categoryArray);
+            }
+
+            const categoriesQuery = await knex('product_category')
+                .join('category', 'product_category.category_id', '=', 'category.id')
+                .where('product_category.product_id', '=', response.id)
+                .select('category.name as categoryName');
+
+            categories = categoriesQuery.map(obj => obj.categoryName);
+
+            response.categories = categories;
+
+            done(null, response);
+
+        } catch(err) {
+            done(err);
+        }
+    },
+
+    editProductById: async (productId, productDetails, done) => {
+        const defaults = {
+            quantity: productDetails.quantity || null, 
+            category_ids: productDetails.category_ids || null,
+            price: productDetails.price || null,
+            description: productDetails.description || null,
+            name: productDetails.name || null
+        }
+
+        if(Object.values(defaults).every(val => val === null)) {
+            const error = new Error('No changes specified');
+            error.status = 400;
+            return done(error);
+        }
+
+        const {quantity, category_ids, ...product} = defaults;
+        
+
+        const productQuery = {};
+        const keys = Object.keys(product);
+
+        keys.forEach(key => {
+            if(product[key] !== null) productQuery[key] = product[key]
+        });
+
+        try {
+            
+            let results = await knex('product')
+                .where({ id: productId })
+                .update(productQuery, ['id', 'name', 'price', 'description', 'inventory_id']);
+
+            if(!results) {
+                results = await knex('product')
+                    .where({id: productId })
+                    .first('id', 'name', 'price', 'description', 'inventory_id');
+            }
+
+            console.log(results);
+
+            const { inventory_id, ...response } = results[0];
+
+            let qty;
+
+            if(quantity) {
+                qty = await knex('product_inventory')
+                    .where('id', inventory_id)
+                    .update({ quantity }, ['quantity']);
+    
+                response.qty_in_stock = qty[0].quantity;
+            } else {
+                qty = await knex('product_inventory')
+                    .where('id', inventory_id)
+                    .first('quantity');
+            }
+
+            let categories = [];
+
+            if(category_ids) {
+                const categoryArray = [];
+
+                await knex('product_category')
+                .where('product_id', '=', response.id)
+                .del();
+
+                for(const category_id of category_ids) {
+                    categoryArray.push({ category_id, product_id: response.id });
+                }
+
+                await knex('product_category')
+                .insert(categoryArray);
+            }
+
+            const categoriesQuery = await knex('product_category')
+                .join('category', 'product_category.category_id', '=', 'category.id')
+                .where('product_category.product_id', '=', response.id)
+                .select('category.name as categoryName');
+
+            categories = categoriesQuery.map(obj => obj.categoryName);
+            
+            response.categories = categories;
+
+            done(null, response);
+        } catch(err) {
+            done(err);
+        }        
     }
 }
