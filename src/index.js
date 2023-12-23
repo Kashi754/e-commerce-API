@@ -6,6 +6,7 @@ const pathToSwaggerUi = require('swagger-ui-dist').absolutePath();
 const passport = require('passport');
 const session = require('express-session');
 const rateLimiterMiddleware = require('./middleware/rateLimiterPostgres');
+const forceHttps = require('./middleware/forceHttps');
 
 // Import Passport config
 require('./config/passport');
@@ -20,10 +21,11 @@ const PORT = process.env.PORT || 5000;
 app.use(express.static(pathToSwaggerUi));
 
 // App Config
-app.use(rateLimiterMiddleware);
 app.use(cors());
+app.use(rateLimiterMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
+app.use(forceHttps);
 
 if(process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
@@ -40,19 +42,22 @@ const store = new KnexSessionStore({
     tablename: 'sessions'
 });
 
-app.use(
-    session({
-        secret: process.env.SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            secure: true,
-            httpOnly: true,
-            maxAge: 1000 * 60 * 5, //5 minutes, for testing
-        },
-        store
-    })
-);
+const sess = session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 5, //5 minutes, for testing
+    },
+    store
+});
+
+if(process.env.NODE_ENV == 'production') {
+    app.set('trust proxy', 1);
+    sess.cookie.secure = true;
+}
+
+app.use(sess);
 
 // Passport Config
 app.use(passport.initialize());
