@@ -43,11 +43,11 @@ const store = new KnexSessionStore({
 });
 
 const sess = session({
-    secret: process.env.SECRET,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 5, //5 minutes, for testing
+        maxAge: 1000 * 60 * 60, //1 Hour
     },
     store
 });

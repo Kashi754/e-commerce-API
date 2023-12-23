@@ -22,7 +22,7 @@ const rateLimiterMiddleware = async (req, res, next) => {
         storeType: 'knex',
         points: 4,
         duration: 60,
-        blockDuration: 30,
+        blockDuration: 60 * 5,
         inMemoryBlockOnConsumed: 5
     }
 
