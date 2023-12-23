@@ -1,25 +1,9 @@
 const express = require('express');
 const products = require('../db/db').products;
+const verifyUserLoggedIn = require('../middleware/verifyUserLoggedIn');
+const verifyUserIsAdmin = require('../middleware/verifyUserIsAdmin.js');
 
 const productsRouter = express.Router();
-
-function verifyIsAdmin(req, res, next) {
-    if(req.user.role != 'admin') {
-        const error = new Error("You do not have permission to do that!");
-        error.status = 403;
-        return next(error);
-    }
-    next();
-}
-
-function verifyUserLoggedIn(req, res, next) {
-    if(!req.user) {
-        const error = new Error("Please log in!");
-        error.status = 401;
-        return next(error);
-    }
-    next();
-}
 
 productsRouter.get('/', async (req, res, next) => {
     //Implement Get to search for products
@@ -47,7 +31,7 @@ productsRouter.get('/', async (req, res, next) => {
     });
 });
 
-productsRouter.post('/', [verifyUserLoggedIn, verifyIsAdmin], (req, res, next) => {
+productsRouter.post('/', [verifyUserLoggedIn, verifyUserIsAdmin], (req, res, next) => {
     const {quantity = 0, category_ids = [], ...product} = req.body;
 
     if(!product.name || !product.price) {
@@ -76,7 +60,7 @@ productsRouter.get('/:productId', (req, res, next) => {
     });
 });
 
-productsRouter.patch('/:productId', (req, res, next) => {
+productsRouter.patch('/:productId', [verifyUserLoggedIn, verifyUserIsAdmin], (req, res, next) => {
     const productId = Number(req.params.productId);
     if(!productId) {
         const error = new Error('Please input a number for Product ID');

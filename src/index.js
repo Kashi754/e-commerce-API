@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const pathToSwaggerUi = require('swagger-ui-dist').absolutePath();
 const passport = require('passport');
 const session = require('express-session');
+const rateLimiterMiddleware = require('./middleware/rateLimiterPostgres');
 
 // Import Passport config
 require('./config/passport');
@@ -19,6 +20,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.static(pathToSwaggerUi));
 
 // App Config
+app.use(rateLimiterMiddleware);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
@@ -44,6 +46,8 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
+            secure: true,
+            httpOnly: true,
             maxAge: 1000 * 60 * 5, //5 minutes, for testing
         },
         store

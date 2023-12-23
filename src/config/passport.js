@@ -11,17 +11,14 @@ passport.use(new LocalStrategy(
             const matchedPassword = await bcrypt.compare(password, user.password_hash);
             if(!matchedPassword) return done(null, false);
 
-            console.log(`Successfully logged in as ${user.username}`)
+            console.log(`User successfully logged in as ${user.username}`)
             return done(null, user);
         })
     }
 ));
 
 passport.serializeUser((user, done) => {
-    done(null, {
-        id: user.id, 
-        role: user.role
-    });
+    done(null, user);
 });
 
 passport.deserializeUser(async (user, done) => {

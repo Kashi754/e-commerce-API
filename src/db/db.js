@@ -1,9 +1,9 @@
 const knexfile = require('../../knexfile');
+require('dotenv').config();
 
 const env = process.env.NODE_ENV || 'development';
 const configOptions = knexfile[env];
 
-require('dotenv').config();
 
 const knex = require('knex')(configOptions);
 

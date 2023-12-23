@@ -43,11 +43,12 @@ module.exports = {
         }
     },
 
-    findUserAuth: async(userName, done) => {
+    findUserAuth: async(userLogin, done) => {
         try {
             const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash')
                 .from('user')
-                .where('username', userName);
+                .where('username', userLogin)
+                .orWhere('email', userLogin);
             if(!user) {
                 const error = new Error(`User with username ${userName} not found!`);
                 error.status = 404;
