@@ -10,6 +10,7 @@ passport.use(new LocalStrategy(
             if(!user) return done(null, false);
             const matchedPassword = await bcrypt.compare(password, user.password_hash);
             if(!matchedPassword) return done(null, false);
+            delete user.password_hash;
 
             console.log(`User successfully logged in as ${user.username}`)
             return done(null, user);

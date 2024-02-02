@@ -27,9 +27,16 @@ productsRouter.get('/', async (req, res, next) => {
 
     products.findProductsByFilter(searchTerm, filters, categoryId, (err, results) => {
         if(err) return next(err);
-            res.json(results);
+        res.json(results);
     });
 });
+
+productsRouter.get('/categories', async (req, res, next) => {
+    products.getAllCategories((err, results) => {
+        if(err) return next(err);
+        res.json(results);
+    })
+})
 
 productsRouter.post('/', [verifyUserLoggedIn, verifyUserIsAdmin], (req, res, next) => {
     const {quantity = 0, category_ids = [], ...product} = req.body;

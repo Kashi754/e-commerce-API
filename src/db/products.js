@@ -37,6 +37,21 @@ module.exports = {
         }
     },
 
+    getAllCategories: async (done) => {
+        try {
+            const results = await knex.select().from('category');
+            if(results.length < 1) {
+                const error = new Error('No categories found!');
+                error.status = 404;
+                return done(error);
+            }
+
+            done(null, results);
+        } catch (err) {
+            done(err);
+        }
+    },
+
     findProductsByFilter: async (searchTerm, filters, categoryId, done) => {
         let { priceLessThan, priceGreaterThan } = filters;
         priceLessThan = Number(priceLessThan) || 1000000000000;

@@ -28,7 +28,7 @@ module.exports = {
     findUser: async (userString, done) => {
         //search database for user by username or email
         try {
-            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name')
+            const user = await knex.first()
                 .from('user')
                 .where('username', userString)
                 .orWhere('email', userString);
@@ -37,7 +37,7 @@ module.exports = {
                 error.status = 422;
                 return next(error);
             }
-            done(null, user)
+            done(null)
         } catch(err) {
             done(err);
         }
@@ -45,10 +45,11 @@ module.exports = {
 
     findUserAuth: async(userLogin, done) => {
         try {
-            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash')
-                .from('user')
+            const user = await knex('user')
+                .join('cart', 'user.id', '=', 'cart.user_id')
                 .where('username', userLogin)
-                .orWhere('email', userLogin);
+                .orWhere('email', userLogin)
+                .first('id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash', 'cart.id as cartId');
             if(!user) {
                 const error = new Error(`User with username ${userName} not found!`);
                 error.status = 404;
@@ -80,11 +81,10 @@ module.exports = {
         try {
             const response = await knex('user').where('id', id).update(
                 user, [
-                    'id', 
                     'username', 
                     'email', 
                     'first_name', 
-                    'last_name'
+                    'last_name',
                 ]
             );
 

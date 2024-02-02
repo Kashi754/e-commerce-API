@@ -70,8 +70,8 @@ module.exports = {
 
             const response = { 
                 ...orderDetails, 
-                products: products, 
-                shipping_address: shipping_address 
+                products, 
+                shipping_address 
             };
 
             done(null, response);

@@ -16,7 +16,7 @@ registerRouter.post('/', async (req, res, next) => {
 
         await users.findUser(user.username, (err, user) => {
             if(err) return next(err);
-            return user;
+            return;
         });
         
         const SALT_ROUNDS = 10;

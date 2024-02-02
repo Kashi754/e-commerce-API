@@ -28,6 +28,13 @@ async function verifyUserOrder(req, res, next) {
 
 ordersRouter.get('/', async (req, res, next) => {
     const userId = req.query.userId || req.user.id;
+    
+    if (req.query.userId && req.user.role !== 'admin') {
+        const error = new Error(`No orders found for user with id ${userId}!`);
+        error.status = 404;
+        return next(error);
+    }
+
     await orders.getOrdersForUser(userId, (err, orders) => {
         if(err) return next(err);
         res.json(orders);
