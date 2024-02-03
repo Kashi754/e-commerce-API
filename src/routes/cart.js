@@ -20,6 +20,7 @@ async function verifyUserCart(req, res, next) {
             error.status = 403;
             return next(error);
         }
+        
         req.cartId = cartId;
 
         next();

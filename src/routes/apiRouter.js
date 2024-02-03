@@ -8,6 +8,8 @@ const usersRouter = require('./users');
 const productsRouter = require('./products');
 const cartRouter = require('./cart');
 const ordersRouter = require('./orders');
+const secretRouter = require('./secret');
+const webhookRouter = require('./webhook');
 
 const apiRouter = express.Router();
 
@@ -18,6 +20,8 @@ apiRouter.use('/users', verifyUserLoggedIn, usersRouter);
 apiRouter.use('/products', productsRouter);
 apiRouter.use('/cart', verifyUserLoggedIn, cartRouter);
 apiRouter.use('/orders', verifyUserLoggedIn, ordersRouter);
+apiRouter.use('/secret', verifyUserLoggedIn, secretRouter);
+apiRouter.use('/webhook', webhookRouter);
 apiRouter.get('/openapi.json', (req, res, next) => {
     res.json(openApi);
 });
