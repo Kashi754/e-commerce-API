@@ -20,10 +20,10 @@ const rateLimiterMiddleware = async (req, res, next) => {
     const opts = {
         storeClient: knex,
         storeType: 'knex',
-        points: 4,
-        duration: 60,
-        blockDuration: 60 * 5,
-        inMemoryBlockOnConsumed: 5
+        points: 40,
+        duration: 1,
+        blockDuration: 6 * 5,
+        inMemoryBlockOnConsumed: 41
     }
 
     const rateLimiter = await createRateLimiter(opts);
@@ -38,8 +38,10 @@ const rateLimiterMiddleware = async (req, res, next) => {
                 "X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
                 "X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
             }
-
-            res.status(429).set(headers).send('Too Many Requests');
+            res.status(429).set(headers).json({
+                status: 429,
+                message: 'Too Many Requests'
+            });
         });
 }
 

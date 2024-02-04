@@ -49,9 +49,9 @@ module.exports = {
                 .join('cart', 'user.id', '=', 'cart.user_id')
                 .where('username', userLogin)
                 .orWhere('email', userLogin)
-                .first('id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash', 'cart.id as cartId');
+                .first('user.id as id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash', 'cart.id as cartId');
             if(!user) {
-                const error = new Error(`User with username ${userName} not found!`);
+                const error = new Error(`User with username ${userLogin} not found!`);
                 error.status = 404;
                 return done(error);
             }

@@ -30,19 +30,11 @@ const getCartById = async (cartId, done) => {
             return done(error);
         }
 
-        const response = { products, total };
+        const response = { products, total: total.total_price };
         done(null, response);
     } catch (err) {
         done(err);
     }
-}
-
-function processPayment (paymentInformation, billingAddr, totalPrice) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({paymentSuccessful: true, provider: 'Visa'});
-        }, 2000)
-    });
 }
 
 exports.getUserForCart = async (id, done) => {

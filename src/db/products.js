@@ -202,8 +202,6 @@ module.exports = {
                     .first('id', 'name', 'price', 'description', 'inventory_id');
             }
 
-            console.log(results);
-
             const { inventory_id, ...response } = results[0];
 
             let qty;

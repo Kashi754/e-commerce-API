@@ -21,14 +21,15 @@ productsRouter.get('/', async (req, res, next) => {
     if(!searchTerm && !categoryId) {
         products.getAllProducts(filters, (err, results) => {
             if(err) return next(err);
-            res.json(results);
+            return res.status(200).json(results);
+        });
+    } else {
+        products.findProductsByFilter(searchTerm, filters, categoryId, (err, results) => {
+            if(err) return next(err);
+            res.status(200).json(results);
         });
     }
 
-    products.findProductsByFilter(searchTerm, filters, categoryId, (err, results) => {
-        if(err) return next(err);
-        res.json(results);
-    });
 });
 
 productsRouter.get('/categories', async (req, res, next) => {
