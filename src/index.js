@@ -16,6 +16,16 @@ require('dotenv').config();
 
 const app = express();
 
+const unless = (path, middleware) => {
+    return (req, res, next) => {
+        if(path === req.path) {
+            return next();
+        } else {
+            return middleware(req, res, next);
+        }
+    }
+}
+
 const PORT = process.env.PORT || 5000;
 
 app.use(express.static(pathToSwaggerUi));
@@ -23,8 +33,8 @@ app.use(express.static(pathToSwaggerUi));
 // App Config
 app.use(cors({ origin: true, credentials: true }));
 app.use(rateLimiterMiddleware);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true}));
+app.use(unless('/webhook', express.json()));
+app.use(unless('/webhook', express.urlencoded({ extended: true})));
 app.use(forceHttps);
 
 if(process.env.NODE_ENV === 'development') {

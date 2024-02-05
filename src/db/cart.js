@@ -127,19 +127,13 @@ exports.deleteCartProduct = async (cartId, productId, done) => {
 
 exports.checkoutCart = async (cartId, paymentInfo, done) => {
     const {
-        payment_information,
-        billing_address,
+        payment_intent,
+        payment_status,
         shipping_address,
         shipping_method
     } = paymentInfo;
 
-    if(!payment_information || !billing_address || !shipping_method) {
-        const error = new Error('Please fill out all required fields!');
-        error.status = 400;
-        return done(error);
-    }
-
-    if(!billing_address.is_shipping && !shipping_address) {
+    if(!payment_intent || !shipping_address || !shipping_method) {
         const error = new Error('Please fill out all required fields!');
         error.status = 400;
         return done(error);
@@ -161,44 +155,17 @@ exports.checkoutCart = async (cartId, paymentInfo, done) => {
         const { user_id, total_price } = await knex('cart')
             .where('id', '=', cartId)
             .first('user_id', 'total_price');
-
-        // Process the payment and if declined return an error
-        const paymentResults = await processPayment(payment_information, billing_address, total_price);
-        const { paymentSuccessful, provider } = paymentResults;
-
-        if(!paymentSuccessful) {
-            await knex('payment_details')
-            .insert({
-                user_id,
-                provider,
-                status: 'declined'
-            })
-
-            const error = new Error('Payment declined, please try another payment method');
-            error.status = 402;
-            return done(error);
-        }
-
-        // Get payment_id for newly made payment
-        const payment = await knex('payment_details')
-            .insert({
-                user_id,
-                provider,
-                status: 'completed'
-            }, ['id']);
-
-        const payment_id = payment[0].id;
         
         // Add shipping address information to the database and get the address_id
-        billing_address.user_id = user_id;
+        user_id;
 
         const shippingAddress = {
-            user_id: billing_address.user_id,
-            addr_line_1: shipping_address?.addr_line_1 || billing_address.addr_line_1,
-            addr_line_2: shipping_address?.addr_line_2 || billing_address.addr_line_2,
-            city: shipping_address?.city || billing_address.city,
-            state: shipping_address?.state || billing_address.state,
-            zip_code: shipping_address?.zip_code || billing_address.zip_code
+            user_id: user_id,
+            addr_line_1: shipping_address.line1,
+            addr_line_2: shipping_address.line2,
+            city: shipping_address.city,
+            state: shipping_address.state,
+            zip_code: shipping_address.postal_code
         }
 
         // TODO: CHECK DATABASE FOR EXISTING ADDRESS //
@@ -216,7 +183,8 @@ exports.checkoutCart = async (cartId, paymentInfo, done) => {
             .insert({
                 total_price,
                 shipping_address_id,
-                shipping_method,
+                payment_intent,
+                status: payment_status
             }, ['id']));
 
         const details_id = details[0].id;
@@ -225,8 +193,7 @@ exports.checkoutCart = async (cartId, paymentInfo, done) => {
         const orderId = await knex('order')
             .insert({
                 user_id,
-                payment_id,
-                details_id
+                details_id,
             }, ['id'])
 
         // Add all items from cart to the order
