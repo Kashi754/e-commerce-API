@@ -7,7 +7,6 @@ usersRouter.get('/', async (req, res, next) => {
     //Implement Get for a user's information
     const userId = req.query?.userId || req.user.id;
     if(!userId) {
-        console.log(req);
         const error = new Error('No userId specified!');
         error.status = 400;
         return next(error);
@@ -18,7 +17,6 @@ usersRouter.get('/', async (req, res, next) => {
         error.status = 403;
         return next(error);
     }
-    console.log(userId);
     await users.findUserById(userId, (err, user) => {
         if(err) return next(err);
         res.json(user);

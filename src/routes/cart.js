@@ -80,11 +80,10 @@ cartRouter.delete('/', verifyUserCart, async (req, res, next) => {
 });
 
 cartRouter.post('/checkout', verifyUserCart, async (req, res, next) => {
-    await cart.checkoutCart(req.cartId, req.body, async (err, response) => {
+    await cart.createPaymentIntent(req.cartId, req.body.paymentIntent, async (err, response) => {
         if(err) return next(err);
-
         res.json(response);
-    })
+    });
 });
 
 module.exports = cartRouter;

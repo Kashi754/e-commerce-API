@@ -37,6 +37,26 @@ const getCartById = async (cartId, done) => {
     }
 }
 
+exports.getCartById = getCartById;
+
+exports.getCartByPaymentIntent = async (paymentIntentId) => {
+    try {
+        const cartId = await knex('cart')
+            .where('payment_intent', '=', paymentIntentId)
+            .first('id');
+
+        if(!cartId) {
+            const error = new Error(`Cart with payment_intent: ${paymentIntentId} not found!`);
+            return [null, error];
+        }
+
+        return [cartId.id];
+    } catch (err) {
+        console.error(err);
+        return [null, err];
+    }
+}
+
 exports.getUserForCart = async (id, done) => {
     try {
         const user = await knex('user')
@@ -56,7 +76,6 @@ exports.getUserForCart = async (id, done) => {
     }
 }
 
-exports.getCartById = getCartById;
 
 exports.addItemToCart = async (cartId, itemData, done) => {
     try {
@@ -125,111 +144,21 @@ exports.deleteCartProduct = async (cartId, productId, done) => {
     }
 }
 
-exports.checkoutCart = async (cartId, paymentInfo, done) => {
-    const {
-        payment_intent,
-        payment_status,
-        shipping_address,
-        shipping_method
-    } = paymentInfo;
-
-    if(!payment_intent || !shipping_address || !shipping_method) {
-        const error = new Error('Please fill out all required fields!');
-        error.status = 400;
-        return done(error);
-    }
-
+exports.createPaymentIntent = async (cartId, paymentIntent, done) => {
     try {
-        // Check if the cart has items in it
-        const cartItems = await knex('cart_product')
-        .where('cart_id', '=', cartId)
-        .select('product_id', 'quantity')
-
-        if(cartItems.length < 1) {
-            const error = new Error('Cannot checkout empty cart!');
-            error.status = 400;
-            return done(error);
-        }   
-
-        // Get the userId and TotalPrice from the cart
-        const { user_id, total_price } = await knex('cart')
-            .where('id', '=', cartId)
-            .first('user_id', 'total_price');
-        
-        // Add shipping address information to the database and get the address_id
-        user_id;
-
-        const shippingAddress = {
-            user_id: user_id,
-            addr_line_1: shipping_address.line1,
-            addr_line_2: shipping_address.line2,
-            city: shipping_address.city,
-            state: shipping_address.state,
-            zip_code: shipping_address.postal_code
-        }
-
-        // TODO: CHECK DATABASE FOR EXISTING ADDRESS //
-        const database_address = await knex('address')
-            .where('user_id', '=', shippingAddress.user_id)
-            .where('addr_line_1', '=', shippingAddress.addr_line_1)
-            .where('city', '=', shippingAddress.city)
-            .first('id');
-
-        const shipping_address_id = database_address?.id || (await knex('address')
-            .insert(shippingAddress, ['id']))[0].id;
-        
-        // Add shipping details to the database and get details_id
-        const details = await (knex('order_details')
-            .insert({
-                total_price,
-                shipping_address_id,
-                payment_intent,
-                status: payment_status
-            }, ['id']));
-
-        const details_id = details[0].id;
-        
-        // Update the database with the new order and get order_id
-        const orderId = await knex('order')
-            .insert({
-                user_id,
-                details_id,
+        const intentCreated = await knex('cart')
+            .where('id', cartId)
+            .update({
+                'payment_intent': paymentIntent
             }, ['id'])
-
-        // Add all items from cart to the order
-        for (const item of cartItems) {
-            item.order_id = orderId[0].id;
-        }
-
-        await knex('order_items')
-            .insert(cartItems);
-
-        const products = await knex('product')
-            .join('order_items', 'product.id', '=', 'order_items.product_id')
-            .where('order_items.order_id', '=', orderId[0].id)
-            .select({
-                id: 'product.id',
-                name: 'product.name',
-                price: 'product.price',
-                qty: 'order_items.quantity'
-            })
-
-        const total = total_price;
-
-        // Clear cart
-        const rowsAffected = await knex('cart_product')
-            .where('cart_id', cartId)
-            .del();
-
-        if(rowsAffected < 1) {
+        
+        if(intentCreated.length < 1) {
             const error = new Error(`Something went wrong!`);
             error.status = 500;
             return done(error);
         }
-
-        const response = { products, total };
-        done(null, response);
-    } catch (err) {
+        return done(null, {msg: `payment intent ${paymentIntent} created!`});
+    } catch(err) {
         done(err);
     }
 }
