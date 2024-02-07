@@ -11,7 +11,6 @@ logoutRouter.get('/', (req, res, next) => {
             if(error) {
                 return next(error)
             }
-            console.log('Successfully logged out!');
             res.status(204).send(`Successfully logged out!`);
         })
     });

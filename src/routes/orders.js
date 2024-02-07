@@ -32,11 +32,15 @@ ordersRouter.get('/', async (req, res, next) => {
     if (req.query.userId && req.user.role !== 'admin') {
         const error = new Error(`No orders found for user with id ${userId}!`);
         error.status = 404;
+        console.log(error);
         return next(error);
     }
 
     await orders.getOrdersForUser(userId, (err, orders) => {
-        if(err) return next(err);
+        if(err) {
+            console.log(err);
+            return next(err);
+        };
         res.json(orders);
     });
 });
@@ -44,7 +48,10 @@ ordersRouter.get('/', async (req, res, next) => {
 ordersRouter.get('/:orderId', verifyUserOrder, async (req, res, next) => {
     const userId = req.query.userId || req.user.id;
     await orders.getOrderById(req.orderId, userId, (err, order) => {
-        if(err) return next(err);
+        if(err) {
+            console.log(err);
+            return next(err);
+        }
         res.json(order);
     });
 });
