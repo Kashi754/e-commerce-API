@@ -31,7 +31,11 @@ const PORT = process.env.PORT || 5000;
 app.use(express.static(pathToSwaggerUi));
 
 // App Config
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({ 
+    origin: 'http://localhost:3000',
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true 
+}));
 app.use(rateLimiterMiddleware);
 app.use(unless('/webhook', express.json()));
 app.use(unless('/webhook', express.urlencoded({ extended: true})));

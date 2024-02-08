@@ -1,4 +1,8 @@
 const knexfile = require('../../knexfile');
+const bcrypt = require('bcrypt');
+const {
+    randomBytes,
+} = require('node:crypto');
 
 const env = process.env.NODE_ENV || 'development';
 const configOptions = knexfile[env];
@@ -51,7 +55,7 @@ module.exports = {
                 .orWhere('email', userLogin)
                 .first('user.id as id', 'username', 'email', 'first_name', 'last_name', 'role', 'password_hash', 'cart.id as cartId');
             if(!user) {
-                const error = new Error(`User with username ${userLogin} not found!`);
+                const error = new Error('Incorrect username or password.');
                 error.status = 404;
                 return done(error);
             }
@@ -96,6 +100,42 @@ module.exports = {
                 return done(error);
             }
             done(null, updatedUser);
+        } catch(err) {
+            done(err);
+        }
+    },
+
+    findOrCreate: async (profile, done) => {
+        try {
+            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'role')
+                .from('user')
+                .where('oauth_id', profile.id);
+
+            if(user) {
+                return done(null, user);
+            }
+
+            const password = randomBytes(15).toString('hex');
+            const SALT_ROUNDS = 10;
+            const salt = await bcrypt.genSalt(SALT_ROUNDS);
+            const hash = await bcrypt.hash(password, salt);
+
+            const userToAdd = {
+                username: profile.displayName,
+                first_name: profile.name.givenName,
+                last_name: profile.name.familyName,
+                password_hash: hash,
+                oauth_id: profile.id
+            }
+
+            const response = await knex('user').returning('id', 'username', 'email', 'first_name', 'last_name', 'role').insert(userToAdd);
+            const newUser = response[0];
+
+            if(!newUser) {
+                const error = new Error('User not created!');
+                return done(error)
+            }
+            return done(null, newUser);
         } catch(err) {
             done(err);
         }
