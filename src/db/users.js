@@ -107,9 +107,10 @@ module.exports = {
 
     findOrCreate: async (profile, done) => {
         try {
-            const user = await knex.first('id', 'username', 'email', 'first_name', 'last_name', 'role')
-                .from('user')
-                .where('oauth_id', profile.id);
+            const user = await knex('user')
+                .join('cart', 'user.id', '=', 'cart.user_id')
+                .where('oauth_id', profile.id)
+                .first('user.id as id', 'username', 'email', 'first_name', 'last_name', 'role', 'cart.id as cartId');
 
             if(user) {
                 return done(null, user);
@@ -124,12 +125,17 @@ module.exports = {
                 username: profile.displayName,
                 first_name: profile.name.givenName,
                 last_name: profile.name.familyName,
+                email: profile.emails[0].value,
                 password_hash: hash,
                 oauth_id: profile.id
             }
 
-            const response = await knex('user').returning('id', 'username', 'email', 'first_name', 'last_name', 'role').insert(userToAdd);
-            const newUser = response[0];
+            await knex('user').insert(userToAdd);
+
+            const newUser = await knex('user')
+                .join('cart', 'user.id', '=', 'cart.user_id')
+                .where('oauth_id', profile.id)
+                .first('user.id as id', 'username', 'email', 'first_name', 'last_name', 'role', 'cart.id as cartId');
 
             if(!newUser) {
                 const error = new Error('User not created!');

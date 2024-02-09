@@ -5,18 +5,19 @@ const usersRouter = express.Router();
 
 usersRouter.get('/', async (req, res, next) => {
     //Implement Get for a user's information
-    const userId = req.query?.userId || req.user.id;
+    const userId = req.query?.userId;
     if(!userId) {
         const error = new Error('No userId specified!');
         error.status = 400;
         return next(error);
     }
 
-    if(req.query?.userId && req.user.role != 'admin') {
+    if(req.user.role != 'admin') {
         const error = new Error("You do not have permission to view User with that ID!");
         error.status = 403;
         return next(error);
     }
+    
     await users.findUserById(userId, (err, user) => {
         if(err) return next(err);
         res.json(user);

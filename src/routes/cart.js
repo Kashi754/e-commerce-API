@@ -4,6 +4,7 @@ const cart = require('../db/db').cart;
 const cartRouter = express.Router();
 
 async function verifyUserCart(req, res, next) {
+    console.log(req.user);
     const cartId = Number(req.params.cartId) || req.user.cartId;
 
     if(!cartId) {

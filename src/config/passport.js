@@ -8,10 +8,14 @@ const users = require('../db/db').users;
 passport.use(new LocalStrategy(
     async function (username, password, done) {
         await users.findUserAuth(username, async (err, user) => {
-            if(err) return done(err);
-            if(!user) return done(null, false);
+            if(!user || err) {
+                const error = new Error('Incorrect username or password.')
+                return done(error);
+            };
             const matchedPassword = await bcrypt.compare(password, user.password_hash);
-            if(!matchedPassword) return done(null, false);
+            if(!matchedPassword) {
+                return done(null, false);
+            };
             delete user.password_hash;
 
             console.log(`User successfully logged in as ${user.username}!`)
@@ -31,7 +35,8 @@ passport.use(new GoogleStrategy(
             if(err) {
                 return done(err);
             }
-            console.log(`User successfully logged in as ${JSON.stringify(profile, null, 2)}!`);
+            console.log(`User successfully logged in as ${profile.displayName}!`);
+            console.log(user);
             return done(null, user);
         })
     }

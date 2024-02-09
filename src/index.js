@@ -34,8 +34,11 @@ app.use(express.static(pathToSwaggerUi));
 app.use(cors({ 
     origin: 'http://localhost:3000',
     methods: 'GET,POST,PUT,DELETE',
-    credentials: true 
+    credentials: true,
+    optionsSuccessStatus: 200,
+    preflightContinue: false
 }));
+
 app.use(rateLimiterMiddleware);
 app.use(unless('/webhook', express.json()));
 app.use(unless('/webhook', express.urlencoded({ extended: true})));
