@@ -28,7 +28,7 @@ registerRouter.post('/', async (req, res, next) => {
 
         await users.createUser(user, (err, user) => {
             if(err) return next(err);
-            res.status(201).json({ message: "Success! New User Created" });   
+            res.status(201).send();   
         });
         
             
