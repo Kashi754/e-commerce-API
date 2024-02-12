@@ -32,8 +32,8 @@ app.use(express.static(pathToSwaggerUi));
 
 // App Config
 app.use(cors({ 
-    origin: 'http://localhost:3000',
-    methods: 'GET,POST,PUT,DELETE',
+    origin: true,
+    methods: ['GET', 'POST' , 'PUT' ,'DELETE' ,'OPTIONS' ,'HEAD'],
     credentials: true,
     optionsSuccessStatus: 200,
     preflightContinue: false
@@ -62,11 +62,13 @@ const knexStore = new KnexSessionStore({
 const SessionCookie = process.env.NODE_ENV == "development" ? {
     secure: false,
     sameSite: "lax",
-    maxAge: 1000 * 60 * 60 * 60 * 24 * 2//2 day
+    maxAge: 1000 * 60 * 60 * 60 * 24 * 2,//2 day
+    httpOnly: true
 } : {
     secure: true,
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 60 * 24 * 2//2 day
+    maxAge: 1000 * 60 * 60 * 60 * 24 * 2,//2 day
+    httpOnly: true
 }
 
 const sess = session({
@@ -82,6 +84,7 @@ if(process.env.NODE_ENV == 'production') {
     sess.cookie.secure = true;
 }
 
+app.set("trust proxy", 1);
 app.use(sess);
 
 // Passport Config

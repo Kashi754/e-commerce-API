@@ -10,10 +10,12 @@ passport.use(new LocalStrategy(
         await users.findUserAuth(username, async (err, user) => {
             if(!user || err) {
                 const error = new Error('Incorrect username or password.')
+                console.log(error);
                 return done(error);
             };
             const matchedPassword = await bcrypt.compare(password, user.password_hash);
             if(!matchedPassword) {
+                console.log('Incorrect password');
                 return done(null, false);
             };
             delete user.password_hash;
@@ -43,9 +45,11 @@ passport.use(new GoogleStrategy(
 ));
 
 passport.serializeUser((user, done) => {
+    console.log('serialized: ', user);
     done(null, user);
 });
 
 passport.deserializeUser(async (user, done) => {
+    console.log('deserialized', user);
     return done(null, user);
 });

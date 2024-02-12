@@ -12,6 +12,7 @@ require('dotenv').config();
 const knex = require('knex')(configOptions);
 
 module.exports = {
+
     findUserById: async (id, done) => {
         //search database for user by id
         try {
@@ -89,6 +90,7 @@ module.exports = {
                     'email', 
                     'first_name', 
                     'last_name',
+                    'role'
                 ]
             );
 
@@ -145,5 +147,11 @@ module.exports = {
         } catch(err) {
             done(err);
         }
+    },
+
+    listUsers: async (filter) => {
+        const users = knex.select('id', 'username')
+            .from('user');
+
     }
 }

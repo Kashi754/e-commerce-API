@@ -12,8 +12,8 @@ usersRouter.get('/', async (req, res, next) => {
         return next(error);
     }
 
-    if(req.user.role != 'admin') {
-        const error = new Error("You do not have permission to view User with that ID!");
+    if(req.user.role !== 'admin') {
+        const error = new Error("Permission Denied!");
         error.status = 403;
         return next(error);
     }
@@ -24,21 +24,40 @@ usersRouter.get('/', async (req, res, next) => {
     });
 });
 
-usersRouter.put('/:userId', async (req, res, next) => {
+usersRouter.put('/', async (req, res, next) => {
     //Implement Put to edit a user's information
-    const userId = req.params.userId;
-    const user = req.body;
+    if(req.user) {    
+        let userId = req.user.id;    
+        const user = req.body;
 
-    if(req.user.id != userId) {
-        const error = new Error("You do not have permission to edit User with that ID!");
+        if(req.user.role === 'admin' && req.query?.userId) {
+            userId = req.query.userId;
+        }
+
+        if(req.user.role !== 'admin') {
+            user.role = 'user';
+        }
+    
+        await users.editUserById(userId, user, (err, updatedUser) => {
+            if(err) return next(err);
+            res.status(201).json(updatedUser);
+        });
+    } else {
+        const error = new Error('Please Log In!');
+        error.status = 401;
+        throw error;
+    }
+});
+
+usersRouter.get('/list', async (req, res, next) => {
+    if(req.user.role !== 'admin') {
+        const error = new Error('Permission Denied!');
         error.status = 403;
         return next(error);
     }
-    await users.editUserById(userId, user, (err, updatedUser) => {
-        if(err) return next(err);
-        res.status(201).json(updatedUser);
-    });
-});
+
+    
+})
 
 
 module.exports = usersRouter;

@@ -3,65 +3,80 @@ const cart = require('../db/db').cart;
 
 const cartRouter = express.Router();
 
-async function verifyUserCart(req, res, next) {
-    console.log(req.user);
-    const cartId = Number(req.params.cartId) || req.user.cartId;
+cartRouter.get('/shipping', async (req, res, next) => {
+    const fedexApiCredentials = {
+        grant_type: 'client_credentials',
+        client_id: process.env.FEDEX_API_KEY,
+        client_secret: process.env.FEDEX_SECRET_KEY
+    };
 
-    if(!cartId) {
-        const error = new Error('Please input a number for cart ID');
-        error.status = 400;
+    const formBody = new URLSearchParams(fedexApiCredentials);
+    
+    const url = 'https://apis-sandbox.fedex.com';
+    const path = '/oauth/token';
+
+    const response = await fetch(url + path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formBody,
+    });
+    
+    if(!response.ok) {
+        const error = await response.json();
+        console.log(error);
+        error.status = 500;
         return next(error);
     }
 
-    await cart.getUserForCart(cartId, (err, userId) => {
-        if(err) return next(err);
-        
-        if(req.user.id != userId && req.user.role !== 'admin') {
-            const error = new Error("You do not have permission to interact with cart with that ID!");
-            error.status = 403;
-            return next(error);
-        }
-        
-        req.cartId = cartId;
+    const data = await response.json();
 
-        next();
-    });
-}
+    const currentTime = Date.now();
 
-cartRouter.get('/', verifyUserCart, async (req, res, next) => {
-    await cart.getCartById(req.cartId, (err, cart) => {
+    const token = {
+        accessToken: data.access_token,
+        expiresAt: currentTime + (data.expires_in * 1000),
+        scope: data.scope
+    };
+
+    res.json(token);
+})
+
+cartRouter.get('/', async (req, res, next) => {
+    await cart.getCartById(req.user.cartId, (err, cart) => {
         if(err) return next(err);
         res.json(cart);
     });
 });
 
-cartRouter.post('/', verifyUserCart, async (req, res, next) => {
+cartRouter.post('/', async (req, res, next) => {
     const itemData = req.body;
 
-    await cart.addItemToCart(req.cartId, itemData, async (err) => {
+    await cart.addItemToCart(req.user.cartId, itemData, async (err) => {
         if(err) return next(err);
 
-        await cart.getCartById(req.cartId, (err, cart) => {
+        await cart.getCartById(req.user.cartId, (err, cart) => {
             if(err) return next(err);
             res.json(cart);
         });
     });
 });
 
-cartRouter.put('/', verifyUserCart, async (req, res, next) => {
+cartRouter.put('/', async (req, res, next) => {
     const itemData = req.body;
 
-    await cart.editCartProduct(req.cartId, itemData, async (err) => {
+    await cart.editCartProduct(req.user.cartId, itemData, async (err) => {
         if(err) return next(err);
 
-        await cart.getCartById(req.cartId, (err, cart) => {
+        await cart.getCartById(req.user.cartId, (err, cart) => {
             if(err) return next(err);
             res.json(cart);
         });
     })
 });
 
-cartRouter.delete('/', verifyUserCart, async (req, res, next) => {
+cartRouter.delete('/', async (req, res, next) => {
     const productId = Number(req.query.product_id);
 
     if(!productId) {
@@ -70,18 +85,18 @@ cartRouter.delete('/', verifyUserCart, async (req, res, next) => {
         return next(error);
     }
 
-    await cart.deleteCartProduct(req.cartId, productId, async (err) => {
+    await cart.deleteCartProduct(req.user.cartId, productId, async (err) => {
         if(err) return next(err);
 
-        await cart.getCartById(req.cartId, (err, cart) => {
+        await cart.getCartById(req.user.cartId, (err, cart) => {
             if(err) return next(err, cart);
             res.json(cart);
         });
     });
 });
 
-cartRouter.post('/checkout', verifyUserCart, async (req, res, next) => {
-    await cart.createPaymentIntent(req.cartId, req.body.paymentIntent, async (err, response) => {
+cartRouter.post('/checkout', async (req, res, next) => {
+    await cart.createPaymentIntent(req.user.cartId, req.body.paymentIntent, async (err, response) => {
         if(err) return next(err);
         res.json(response);
     });

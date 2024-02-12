@@ -1,9 +1,11 @@
 const express = require('express');
 const passport = require('passport');
+const signature = require('cookie-signature');
 
 const loginRouter = express.Router();
 
 loginRouter.get("/success", (req, res) => {
+    console.log(req.sessionID);
     if(req.user) {
         res.status(200).json(req.user);
     } else {
@@ -20,7 +22,7 @@ loginRouter.get("/failed", (req, res) => {
     throw error;
 });
 
-loginRouter.post('/', passport.authenticate('local', { failWithError: true }), 
+loginRouter.post('/', passport.authenticate('local', { session: true, failWithError: true }), 
     (req, res, next) => {
         // const user = req.user;
         // return res.json(user);

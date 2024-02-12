@@ -26,7 +26,7 @@ exports.getUserForOrder = async (id, done) => {
     }
 }
 
-exports.getOrderById = async (orderId, userId, done) => {
+exports.getOrderById = async (orderId, done) => {
     try {
         const orderDetails = await knex('order')
             .join('order_details', 'order.details_id', '=', 'order_details.id')
@@ -36,7 +36,8 @@ exports.getOrderById = async (orderId, userId, done) => {
                 date: 'order_details.created_at',
                 total: 'order_details.total_price',
                 shipping_status: 'order_details.shipping_status',
-                payment_status: 'order_details.payment_status'
+                payment_status: 'order_details.payment_status',
+                tracking_number: 'order_details.tracking_number',
             })
 
         if(!orderDetails) {

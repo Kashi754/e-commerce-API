@@ -48,9 +48,9 @@ productsRouter.post('/', [verifyUserLoggedIn, verifyUserIsAdmin], (req, res, nex
         return next(error);
     }
 
-    products.addProductToDatabase(product, quantity, category_ids, (err, results) => {
+    products.addProductToDatabase(product, quantity, category_ids, (err) => {
         if(err) return next(err);
-        res.json(results);
+        res.status(201).json({ message: 'Product Sucessfully Added!' });
     })
 });
 
@@ -68,13 +68,26 @@ productsRouter.get('/:productId', (req, res, next) => {
     });
 });
 
-productsRouter.patch('/:productId', [verifyUserLoggedIn, verifyUserIsAdmin], (req, res, next) => {
+productsRouter.put('/:productId', [verifyUserLoggedIn, verifyUserIsAdmin], (req, res, next) => {
     const productId = Number(req.params.productId);
     if(!productId) {
         const error = new Error('Please input a number for Product ID');
         error.status = 400;
         return next(error);
     }
+    
+    const requiredKeys = ['quantity', 'category_ids', 'price', 'name'];
+    const hasAllRequiredKeys = requiredKeys.every(key => req.body.hasOwnProperty(key));
+    
+    if(!hasAllRequiredKeys)
+    for (let key in req.body) {
+        if(!req.body[key] && key !== 'description') {
+            const error = new Error('Please provide all required information!');
+            error.status = 400;
+            return next(error);
+        }
+    }
+    
 
     products.editProductById(productId, req.body, (err, results) => {
         if(err) return next(err);
