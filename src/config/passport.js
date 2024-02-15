@@ -38,18 +38,15 @@ passport.use(new GoogleStrategy(
                 return done(err);
             }
             console.log(`User successfully logged in as ${profile.displayName}!`);
-            console.log(user);
             return done(null, user);
         })
     }
 ));
 
 passport.serializeUser((user, done) => {
-    console.log('serialized: ', user);
     done(null, user);
 });
 
 passport.deserializeUser(async (user, done) => {
-    console.log('deserialized', user);
     return done(null, user);
 });

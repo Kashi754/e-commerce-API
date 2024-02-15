@@ -4,22 +4,21 @@ const signature = require('cookie-signature');
 
 const loginRouter = express.Router();
 
-loginRouter.get("/success", (req, res) => {
-    console.log(req.sessionID);
+loginRouter.get("/success", (req, res, next) => {
     if(req.user) {
         res.status(200).json(req.user);
     } else {
         const error = new Error('Please Log In!');
         error.status = 401;
-        throw error;
+        return next(error);
     }
 })
 
-loginRouter.get("/failed", (req, res) => {
+loginRouter.get("/failed", (req, res, next) => {
     const message = req.session.error || 'failure';
     const error = new Error(message);
     error.status = 401;
-    throw error;
+    return next(error)
 });
 
 loginRouter.post('/', passport.authenticate('local', { session: true, failWithError: true }), 

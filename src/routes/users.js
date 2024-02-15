@@ -45,7 +45,7 @@ usersRouter.put('/', async (req, res, next) => {
     } else {
         const error = new Error('Please Log In!');
         error.status = 401;
-        throw error;
+        return next(error);
     }
 });
 

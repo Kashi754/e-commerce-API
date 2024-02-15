@@ -42,7 +42,7 @@ exports.getCartById = getCartById;
 exports.getCartByPaymentIntent = async (paymentIntentId) => {
     try {
         const cartId = await knex('cart')
-            .where('payment_intent', '=', paymentIntentId)
+            .where('payment_intent', paymentIntentId)
             .first('id');
 
         if(!cartId) {

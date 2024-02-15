@@ -159,14 +159,10 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
             return;
         }
 
-        console.log('cart contains items!');
-
         // Get the userId and TotalPrice from the cart
         const { user_id, total_price } = await knex('cart')
             .where('id', '=', cartId)
             .first('user_id', 'total_price');
-
-        console.log(`User ${user_id} found`);
         
         // Add shipping address information to the database and get the address_id
         user_id;
@@ -188,10 +184,7 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
             .first('id');
 
         const shipping_address_id = database_address?.id || (await knex('address')
-            .insert(shippingAddress, ['id']))[0].id;
-
-        console.log(`shipping address id ${shipping_address_id} created/found!`);
-    
+            .insert(shippingAddress, ['id']))[0].id;    
 
         // Add shipping details to the database and get details_id
         const details = await (knex('order_details')
@@ -204,16 +197,12 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
 
         const details_id = details[0].id;
 
-        console.log(`order_details with id ${details_id} created!`)
-
         // Update the database with the new order and get order_id
         const orderId = await knex('order')
             .insert({
                 user_id,
                 details_id,
             }, ['id'])
-
-        console.log(`Order with id ${orderId} created`);
 
         // Add all items from cart to the order
         for (const item of cartItems) {
@@ -223,9 +212,13 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
         await knex('order_items')
             .insert(cartItems);
 
-        console.log(`Sucessfully inserted cart items into order!`);
-
         // Clear cart
+        await knex('cart')
+            .where('id', cartId)
+            .update({
+                payment_intent: null
+            })
+            
         const rowsAffected = await knex('cart_product')
             .where('cart_id', cartId)
             .del();
@@ -236,8 +229,6 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
             console.error(error);
             return;
         }
-
-        console.log('Order sucessfully created!');
     } catch (err) {
         console.error(err);
     }
