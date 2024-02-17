@@ -57,7 +57,6 @@ cartRouter.delete('/', async (req, res, next) => {
 });
 
 cartRouter.post('/checkout', async (req, res, next) => {
-    console.log(req.body);
     await cart.createPaymentIntent(req.user.cartId, req.body.paymentIntent, async (err, response) => {
         if(err) return next(err);
         res.json(response);

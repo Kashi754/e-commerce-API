@@ -58,41 +58,55 @@ module.exports = {
         priceGreaterThan = Number(priceGreaterThan) || 0;
         const searchFilter = '%' + searchTerm + '%';
 
-        let queryBuilder = knex('product')
+        const baseQueryBuilder = knex('product')
             .join('product_inventory', 'product.inventory_id', '=', 'product_inventory.id')
             .join('product_category', 'product.id', '=', 'product_category.product_id')
             .join('category', 'product_category.category_id', '=', 'category.id')
         
+        const searchQueryBuilder = builder => {
+            builder.whereILike('product.name', searchFilter)
+                .orWhereILike('product.description', searchFilter)
+                .orWhereILike('category.name', searchFilter)
+        };
 
-        queryBuilder = !categoryId ? queryBuilder : queryBuilder
-            .where('category.id', '=', categoryId);
+        const categoryQueryBuilder = builder => {
+            searchTerm ?
+            builder.where('category.id', '=', categoryId)
+                .andWhere(searchQueryBuilder):
+            builder.where('category.id', '=', categoryId);
+        };
 
-        queryBuilder = !searchTerm ? queryBuilder : queryBuilder
-            .whereILike('product.name', searchFilter)
-            .orWhereILike('product.description', searchFilter)
-            .orWhereILike('category.name', searchFilter)
+        const finalQueryBuilder = baseQueryBuilder
+            .where(
+                categoryId ?
+                categoryQueryBuilder :
+                searchQueryBuilder
+            )
 
+        const completeQuery = finalQueryBuilder
+        .andWhere('product.price', '>=', priceGreaterThan)
+        .andWhere('product.price', '<=', priceLessThan)
+        .distinct({
+            id: 'product.id',
+            name: 'product.name',
+            price: 'product.price',
+            description: 'product.description',
+            qty_in_stock: 'product_inventory.quantity',
+        });
+            
         try {
-            const results = await queryBuilder
-                .andWhere('product.price', '>=', priceGreaterThan)
-                .andWhere('product.price', '<=', priceLessThan)
-                .select({
-                    id: 'product.id',
-                    name: 'product.name',
-                    price: 'product.price',
-                    description: 'product.description',
-                    qty_in_stock: 'product_inventory.quantity'
-                })
-                .distinct('product.id');
+            const results = await completeQuery;
 
             if(results.length < 1) {
                 const error = new Error('No products found!');
+                console.log(error);
                 error.status = 404;
                 return done(error);
             }
 
             done(null, results);
         } catch(err) {
+            console.log(err);
             done(err);
         }
     },
