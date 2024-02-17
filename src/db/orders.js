@@ -29,15 +29,16 @@ exports.getUserForOrder = async (id, done) => {
 exports.getOrderById = async (orderId, done) => {
     try {
         const orderDetails = await knex('order')
-            .join('order_details', 'order.details_id', '=', 'order_details.id')
+            .join('order_details', 'order.order_details_id', '=', 'order_details.id')
+            .join('shipping_details', 'order.shipping_details_id', '=', 'shipping_details.id')
             .where('order.id', '=', orderId)
             .first({
                 id: 'order.id',
                 date: 'order_details.created_at',
                 total: 'order_details.total_price',
-                shipping_status: 'order_details.shipping_status',
+                shipping_status: 'shipping_details.shipping_status',
                 payment_status: 'order_details.payment_status',
-                tracking_number: 'order_details.tracking_number',
+                tracking_number: 'shipping_details.tracking_number',
             })
 
         if(!orderDetails) {
@@ -58,8 +59,8 @@ exports.getOrderById = async (orderId, done) => {
             })
 
         const shipping_address = await knex('address')
-            .join('order_details', 'address.id', '=', 'order_details.shipping_address_id')
-            .join('order', 'order_details.id', '=', 'order.details_id')
+            .join('shipping_details', 'address.id', '=', 'shipping_details.shipping_address_id')
+            .join('order', 'shipping_details.id', '=', 'order.shipping_details_id')
             .where('order.id', '=', orderId)
             .first(
                 'addr_line_1',
@@ -84,13 +85,14 @@ exports.getOrderById = async (orderId, done) => {
 exports.getOrdersForUser = async (userId, done) => {
     try {
         const orders = await knex('order')
-            .join('order_details', 'order.details_id', '=', 'order_details.id')
+            .join('order_details', 'order.order_details_id', '=', 'order_details.id')
+            .join('shipping_details', 'order.shipping_details_id', 'shipping_details.id')
             .where('order.user_id', '=', userId)
             .select({
                 id: 'order.id',
                 date: 'order_details.created_at',
                 total: 'order_details.total_price',
-                shipping_status: 'order_details.shipping_status',
+                shipping_status: 'shipping_details.shipping_status',
                 payment_status: 'order_details.payment_status'
             })
 
@@ -145,13 +147,13 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
     const payment_intent = paymentIntent.id;
     const payment_status = paymentIntent.status;
     const shipping_address = paymentIntent.shipping.address;
-    const shipping_method = null;
+    const service_type = paymentIntent.shipping.carrier;
 
     try {
         // Check if the cart has items in it
         const cartItems = await knex('cart_product')
-        .where('cart_id', '=', cartId)
-        .select('product_id', 'quantity')
+            .where('cart_id', '=', cartId)
+            .select('product_id', 'quantity')
 
         if(cartItems.length < 1) {
             const error = new Error('Cannot checkout empty cart!');
@@ -176,6 +178,10 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
             zip_code: shipping_address.postal_code
         }
 
+        const shippingPrice = await knex('cart')
+            .where('id', '=', cartId)
+            .first('shipping_price');
+
         // TODO: CHECK DATABASE FOR EXISTING ADDRESS //
         const database_address = await knex('address')
             .where('user_id', '=', shippingAddress.user_id)
@@ -187,21 +193,30 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
             .insert(shippingAddress, ['id']))[0].id;    
 
         // Add shipping details to the database and get details_id
-        const details = await (knex('order_details')
+        const orderDetails = await knex('order_details')
             .insert({
                 total_price,
-                shipping_address_id,
                 payment_intent,
                 payment_status: payment_status
-            }, ['id']));
+            }, ['id']);
 
-        const details_id = details[0].id;
+        const order_details_id = orderDetails[0].id;
+
+        const shippingDetails = await knex('shipping_details')
+            .insert({
+                shipping_address_id,
+                shipping_price: shippingPrice.shipping_price,
+                service_type
+            }, ['id']);
+
+        const shipping_details_id = shippingDetails[0].id;
 
         // Update the database with the new order and get order_id
         const orderId = await knex('order')
             .insert({
                 user_id,
-                details_id,
+                order_details_id,
+                shipping_details_id
             }, ['id'])
 
         // Add all items from cart to the order
@@ -216,7 +231,8 @@ exports.createNewOrder = async (cartId, paymentIntent) => {
         await knex('cart')
             .where('id', cartId)
             .update({
-                payment_intent: null
+                payment_intent: null,
+                shipping_price: null
             })
             
         const rowsAffected = await knex('cart_product')

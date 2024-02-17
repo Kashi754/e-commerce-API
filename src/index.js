@@ -33,7 +33,7 @@ app.use(express.static(pathToSwaggerUi));
 // App Config
 app.use(cors({ 
     origin: true,
-    methods: ['GET', 'POST' , 'PUT' ,'DELETE' ,'OPTIONS' ,'HEAD'],
+    methods: ['GET', 'POST' , 'PUT' ,'DELETE' ,'OPTIONS' ,'HEAD', 'PATCH'],
     credentials: true,
     optionsSuccessStatus: 200,
     preflightContinue: false

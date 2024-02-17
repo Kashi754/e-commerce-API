@@ -150,7 +150,7 @@ exports.createPaymentIntent = async (cartId, paymentIntent, done) => {
             .where('id', cartId)
             .update({
                 'payment_intent': paymentIntent
-            }, ['id'])
+            }, ['id']);
         
         if(intentCreated.length < 1) {
             const error = new Error(`Something went wrong!`);
@@ -158,6 +158,25 @@ exports.createPaymentIntent = async (cartId, paymentIntent, done) => {
             return done(error);
         }
         return done(null, {msg: `payment intent ${paymentIntent} created!`});
+    } catch(err) {
+        done(err);
+    }
+}
+
+exports.updateShippingPrice = async (cartId, shippingPrice, done) => {
+    try {
+        const serviceTypeUpdated = await knex('cart')
+            .where('id', cartId)
+            .update({
+                'shipping_price': shippingPrice
+            }, ['id']);
+
+        if(serviceTypeUpdated.length < 1) {
+            const error = new Error(`Something went wrong!`);
+            error.status = 500;
+            return done(error);
+        }
+        return done(null, {msg: `shipping price ${shippingPrice} updated!`});
     } catch(err) {
         done(err);
     }

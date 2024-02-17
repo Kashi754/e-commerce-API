@@ -59,9 +59,9 @@ module.exports = {
         const searchFilter = '%' + searchTerm + '%';
 
         let queryBuilder = knex('product')
-        .join('product_inventory', 'product.inventory_id', '=', 'product_inventory.id')
-        .join('product_category', 'product.id', '=', 'product_category.product_id')
-        .join('category', 'product_category.category_id', '=', 'category.id')
+            .join('product_inventory', 'product.inventory_id', '=', 'product_inventory.id')
+            .join('product_category', 'product.id', '=', 'product_category.product_id')
+            .join('category', 'product_category.category_id', '=', 'category.id')
         
 
         queryBuilder = !categoryId ? queryBuilder : queryBuilder

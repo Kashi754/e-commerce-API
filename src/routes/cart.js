@@ -132,5 +132,14 @@ cartRouter.post('/shipping', async (req, res, next) => {
     res.json(shippingInfo);
 })
 
+cartRouter.patch('/shipping', async (req, res, next) => {
+    const { shippingPrice } = req.body;
+
+    await cart.updateShippingPrice(req.user.cartId, shippingPrice, (err, msg) => {
+        if(err) return next(err);
+        res.status(201).json(msg);
+    });
+})
+
 
 module.exports = cartRouter;
