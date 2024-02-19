@@ -2,9 +2,11 @@ const { orders, cart } = require('../db/db');
 
 exports.handlePaymentIntentSucceeded = async (paymentIntent) => {
   // Check if processing order already exists
-  const [orderDetailsId, error] = await orders.getOrderByPaymentIntent(paymentIntent.id);
+  const [orderDetailsId, error] = await orders.getOrderByPaymentIntent(
+    paymentIntent.id
+  );
 
-  if(orderDetailsId) {
+  if (orderDetailsId) {
     // Update payment_status
     await orders.updatePaymentStatus(orderDetailsId, paymentIntent.status);
   } else {
@@ -16,7 +18,7 @@ exports.handlePaymentIntentSucceeded = async (paymentIntent) => {
     }
 
     await orders.createNewOrder(cartId, paymentIntent);
-  }  
+  }
   return;
 };
 
@@ -28,9 +30,11 @@ exports.handlePaymentIntentProcessing = async (paymentIntent) => {
 
 exports.handlePaymentIntentFailed = async (paymentIntent) => {
   // Get the if for the customers order_details
-  const [orderDetailsId, error] = await orders.getOrderByPaymentIntent(paymentIntent.id);
+  const [orderDetailsId, error] = await orders.getOrderByPaymentIntent(
+    paymentIntent.id
+  );
   // Update payment_status
-  if(error) return;
+  if (error) return;
   await orders.updatePaymentStatus(orderDetailsId, paymentIntent.status);
   return;
 };

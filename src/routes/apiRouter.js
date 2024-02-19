@@ -22,8 +22,8 @@ apiRouter.use('/cart', verifyUserLoggedIn, cartRouter);
 apiRouter.use('/orders', verifyUserLoggedIn, ordersRouter);
 apiRouter.use('/secret', verifyUserLoggedIn, secretRouter);
 apiRouter.use('/webhook', webhookRouter);
-apiRouter.get('/openapi.json', (req, res, next) => {
-    res.json(openApi);
+apiRouter.get('/openapi.json', (_req, res) => {
+  res.json(openApi);
 });
 
 module.exports = apiRouter;

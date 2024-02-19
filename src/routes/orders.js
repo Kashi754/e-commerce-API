@@ -4,56 +4,55 @@ const orders = require('../db/db').orders;
 const ordersRouter = express.Router();
 
 async function verifyUserOrder(req, res, next) {
-    const orderId = Number(req.params.orderId);
+  const orderId = Number(req.params.orderId);
 
-    if(!orderId) {
-        const error = new Error('Please input a number for order ID');
-        error.status = 400;
-        return next(error);
+  if (!orderId) {
+    const error = new Error('Please input a number for order ID');
+    error.status = 400;
+    return next(error);
+  }
+
+  await orders.getUserForOrder(orderId, (err, userId) => {
+    if (err) return next(err);
+
+    if (req.user.id != userId && req.user.role != 'admin') {
+      const error = new Error('Permission Denied!');
+      error.status = 403;
+      return next(error);
     }
+    req.orderId = orderId;
 
-    await orders.getUserForOrder(orderId, (err, userId) => {
-        if(err) return next(err);
-        
-        if(req.user.id != userId && req.user.role != 'admin') {
-            const error = new Error("Permission Denied!");
-            error.status = 403;
-            return next(error);
-        }
-        req.orderId = orderId;
-
-        next();
-    });
+    next();
+  });
 }
 
 ordersRouter.get('/', async (req, res, next) => {
-    const userId = req.query.userId || req.user.id;
-    
-    if (req.query.userId && req.user.role !== 'admin') {
-        const error = new Error(`No orders found for user with id ${userId}!`);
-        error.status = 404;
-        console.log(error);
-        return next(error);
-    }
+  const userId = req.query.userId || req.user.id;
 
-    await orders.getOrdersForUser(userId, (err, orders) => {
-        if(err) {
-            console.log(err);
-            return next(err);
-        };
-        res.json(orders);
-    });
+  if (req.query.userId && req.user.role !== 'admin') {
+    const error = new Error(`No orders found for user with id ${userId}!`);
+    error.status = 404;
+    console.log(error);
+    return next(error);
+  }
+
+  await orders.getOrdersForUser(userId, (err, orders) => {
+    if (err) {
+      console.log(err);
+      return next(err);
+    }
+    res.json(orders);
+  });
 });
 
 ordersRouter.get('/:orderId', verifyUserOrder, async (req, res, next) => {
-    await orders.getOrderById(req.orderId, (err, order) => {
-        if(err) {
-            console.log(err)
-            return next(err);
-        }
-        res.json(order);
-    });
+  await orders.getOrderById(req.orderId, (err, order) => {
+    if (err) {
+      console.log(err);
+      return next(err);
+    }
+    res.json(order);
+  });
 });
-
 
 module.exports = ordersRouter;
