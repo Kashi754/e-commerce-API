@@ -116,6 +116,51 @@ exports.getOrdersForUser = async (userId, done) => {
   }
 };
 
+exports.getOrders = async (done) => {
+  try {
+    const orders = await knex('order')
+      .join('order_details', 'order.order_details_id', '=', 'order_details.id')
+      .join(
+        'shipping_details',
+        'order.shipping_details_id',
+        'shipping_details.id'
+      )
+      .select({
+        id: 'order.id',
+        date: 'order_details.created_at',
+        total: 'order_details.total_price',
+        shipping_status: 'shipping_details.shipping_status',
+        payment_status: 'order_details.payment_status',
+      });
+    done(null, orders);
+  } catch (err) {
+    done(err);
+  }
+};
+
+exports.getFilteredOrders = async (filter, done) => {
+  try {
+    const orders = await knex('order')
+      .join('order_details', 'order.order_details_id', '=', 'order_details.id')
+      .join(
+        'shipping_details',
+        'order.shipping_details_id',
+        'shipping_details.id'
+      )
+      .where('shipping_details.shipping_status', '=', filter)
+      .select({
+        id: 'order.id',
+        date: 'order_details.created_at',
+        total: 'order_details.total_price',
+        shipping_status: 'shipping_details.shipping_status',
+        payment_status: 'order_details.payment_status',
+      });
+    done(null, orders);
+  } catch (err) {
+    done(err);
+  }
+};
+
 exports.getOrderByPaymentIntent = async (paymentIntentId) => {
   try {
     const orderDetailsId = await knex('order_details')

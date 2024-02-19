@@ -15,7 +15,7 @@ async function verifyUserOrder(req, res, next) {
   await orders.getUserForOrder(orderId, (err, userId) => {
     if (err) return next(err);
 
-    if (req.user.id != userId && req.user.role != 'admin') {
+    if (req.user.id !== userId && req.user.role !== 'admin') {
       const error = new Error('Permission Denied!');
       error.status = 403;
       return next(error);
@@ -43,6 +43,41 @@ ordersRouter.get('/', async (req, res, next) => {
     }
     res.json(orders);
   });
+});
+
+ordersRouter.get('/admin', async (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    const error = new Error('Permission Denied!');
+    error.status = 403;
+    return next(error);
+  }
+  const { filter } = req.query || null;
+
+  if (filter === 'pending' || filter === 'shipped' || filter === 'delivered') {
+    await orders.getFilteredOrders(filter, (err, orders) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json(orders);
+    });
+  } else if (filter) {
+    await orders.getOrderById(filter, (err, order) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json([order]);
+    });
+  } else {
+    await orders.getOrders((err, orders) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json(orders);
+    });
+  }
 });
 
 ordersRouter.get('/:orderId', verifyUserOrder, async (req, res, next) => {
