@@ -49,11 +49,122 @@ usersRouter.put('/', async (req, res, next) => {
   }
 });
 
-usersRouter.get('/list', async (req, res, next) => {
+usersRouter.get('/admin', async (req, res, next) => {
   if (req.user.role !== 'admin') {
     const error = new Error('Permission Denied!');
     error.status = 403;
     return next(error);
+  }
+  const { filter } = req.query || null;
+  console.log(req.query);
+
+  if (filter === 'user' || filter === 'admin') {
+    await users.getUsersByRole(filter, (err, users) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json(users);
+    });
+  } else if (filter) {
+    await users.getUserByEmail(filter, (err, user) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json([user]);
+    });
+  } else {
+    await users.getUsers((err, users) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json(users);
+    });
+  }
+});
+
+usersRouter.patch('/:userId', async (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    const error = new Error('Permission Denied!');
+    error.status = 403;
+    return next(error);
+  }
+  const userId = req.params.userId;
+  const user = req.body;
+
+  if (!userId || !user) {
+    const error = new Error('Invalid Input!');
+    error.status = 400;
+    return next(error);
+  }
+  await users.patchUserById(userId, user, (err) => {
+    if (err) return next(err);
+  });
+
+  const { filter } = req.query || null;
+
+  if (filter) {
+    await users.getUserByEmail(filter, (err, user) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json([user]);
+    });
+  } else {
+    await users.getUsers((err, users) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      res.json(users);
+    });
+  }
+});
+
+usersRouter.delete('/:userId', async (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    const error = new Error('Permission Denied!');
+    error.status = 403;
+    return next(error);
+  }
+
+  const userId = req.params.userId;
+  console.log(req.params);
+
+  if (!userId) {
+    const error = new Error('Please input a number for user ID');
+    error.status = 400;
+    return next(error);
+  }
+
+  console.log(userId);
+
+  await users.deleteUserById(userId, (err) => {
+    if (err) return next(err);
+  });
+
+  const { filter } = req.query || null;
+
+  if (filter) {
+    await users.getUserByEmail(filter, (err, user) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      return res.json([user]);
+    });
+  } else {
+    await users.getUsers((err, users) => {
+      if (err) {
+        console.log(err);
+        return next(err);
+      }
+      console.log(users);
+      return res.json(users);
+    });
   }
 });
 

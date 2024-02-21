@@ -172,6 +172,97 @@ exports.findOrCreate = async (profile, done) => {
   }
 };
 
-exports.listUsers = async (filter) => {
-  const users = knex.select('id', 'username').from('user');
+exports.getUsers = async (done) => {
+  const users = await knex('user').select({
+    id: 'user.id',
+    username: 'user.username',
+    email: 'user.email',
+    first_name: 'user.first_name',
+    last_name: 'user.last_name',
+    role: 'user.role',
+  });
+
+  if (!users) {
+    const error = new Error('Users not found!');
+    error.status = 404;
+    return done(error);
+  }
+
+  done(null, users);
+};
+
+exports.getUsersByRole = async (role, done) => {
+  const users = await knex('user')
+    .select({
+      id: 'user.id',
+      username: 'user.username',
+      email: 'user.email',
+      first_name: 'user.first_name',
+      last_name: 'user.last_name',
+      role: 'user.role',
+    })
+    .where('role', role);
+
+  if (!users) {
+    const error = new Error('Users not found!');
+    error.status = 404;
+    return done(error);
+  }
+
+  done(null, users);
+};
+
+exports.getUserByEmail = async (email, done) => {
+  const users = await knex('user')
+    .select({
+      id: 'user.id',
+      username: 'user.username',
+      email: 'user.email',
+      first_name: 'user.first_name',
+      last_name: 'user.last_name',
+      role: 'user.role',
+    })
+    .where('email', email);
+
+  if (!users) {
+    const error = new Error('Users not found!');
+    error.status = 404;
+    return done(error);
+  }
+
+  done(null, users);
+};
+
+exports.patchUserById = async (id, user, done) => {
+  try {
+    const response = await knex('user')
+      .where('id', id)
+      .update(user, ['username', 'email', 'first_name', 'last_name', 'role']);
+
+    const updatedUser = response[0];
+
+    if (!updatedUser) {
+      const error = new Error(`User with ID ${id} not found!`);
+      error.status = 404;
+      return done(error);
+    }
+
+    done(null);
+  } catch (err) {
+    done(err);
+  }
+};
+
+exports.deleteUserById = async (id, done) => {
+  try {
+    const response = await knex('user').where('id', id).del();
+    if (!response) {
+      const error = new Error(`User with ID ${id} not found!`);
+      error.status = 404;
+      return done(error);
+    }
+    done(null);
+  } catch (err) {
+    done(err);
+  }
 };

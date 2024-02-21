@@ -30,10 +30,10 @@ registerRouter.post('/', async (req, res, next) => {
     const hash = await bcrypt.hash(user.password, salt);
     user.password_hash = hash;
     delete user.password;
-
+    user.role = req.user.role === 'admin' ? user.role : 'user';
     await users.createUser(user, (err) => {
       if (err) return next(err);
-      res.status(201).send();
+      res.status(201).send(user);
     });
   } catch (err) {
     err.status = 500;
