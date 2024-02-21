@@ -6,6 +6,7 @@ const passport = require('passport');
 const session = require('express-session');
 const rateLimiterMiddleware = require('./middleware/rateLimiterPostgres');
 const forceHttps = require('./middleware/forceHttps');
+const path = require('path');
 
 // Import Passport config
 require('./config/passport');
@@ -27,7 +28,8 @@ const unless = (path, middleware) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.use(express.static(pathToSwaggerUi));
+app.use('/docs', express.static(pathToSwaggerUi));
+app.use('/assets', express.static('public'));
 
 // App Config
 app.use(
@@ -102,10 +104,13 @@ app.use('/', apiRouter);
 // ErrorHandler
 
 const jsonErrorHandler = (err, _req, res) => {
-  res.status(err.status || 500).json({
-    status: err.status || 500,
-    message: err.message,
-  });
+  console.log(path.join(__dirname, '..', 'public'));
+  res.status
+    ? res.status(err.status || 500).json({
+        status: err.status || 500,
+        message: err.message,
+      })
+    : res();
 };
 
 if (process.env.NODE_ENV === 'development') {
