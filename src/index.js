@@ -18,7 +18,7 @@ const app = express();
 
 const unless = (path, middleware) => {
   return (req, res, next) => {
-    if (path === req.path) {
+    if (path.indexOf(req.path) !== -1) {
       return next();
     } else {
       return middleware(req, res, next);
@@ -43,8 +43,8 @@ app.use(
 );
 
 app.use(rateLimiterMiddleware);
-app.use(unless('/webhook', express.json()));
-app.use(unless('/webhook', express.urlencoded({ extended: true })));
+app.use(unless(['/webhook'], express.json()));
+app.use(unless(['/webhook'], express.urlencoded({ extended: true })));
 app.use(forceHttps);
 
 if (process.env.NODE_ENV === 'development') {

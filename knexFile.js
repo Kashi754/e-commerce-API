@@ -10,7 +10,7 @@ module.exports = {
       port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: process.env.DDATABASE,
+      database: process.env.DATABASE,
     },
     migrations: {
       directory: './src/db/data/migrations',

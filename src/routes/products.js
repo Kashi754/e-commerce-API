@@ -1,7 +1,23 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
 const products = require('../db/db').products;
 const verifyUserLoggedIn = require('../middleware/verifyUserLoggedIn');
 const verifyUserIsAdmin = require('../middleware/verifyUserIsAdmin.js');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images/products');
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      file.fieldname + '-' + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const productsRouter = express.Router();
 
@@ -43,11 +59,26 @@ productsRouter.get('/categories', async (req, res, next) => {
   });
 });
 
+productsRouter.post('/categories', async (req, res, next) => {
+  products.addCategory(req.body.name, (err, results) => {
+    if (err) return next(err);
+    res.json(results[0]);
+  });
+});
+
 productsRouter.post(
   '/',
-  [verifyUserLoggedIn, verifyUserIsAdmin],
+  [verifyUserLoggedIn, verifyUserIsAdmin, upload.single('image')],
   (req, res, next) => {
-    const { quantity = 0, category_ids = [], ...product } = req.body;
+    const quantity = req.body.quantity || 0;
+    const category_ids =
+      JSON.parse(req.body.categories).map((id) => Number(id)) || [];
+    const product = {
+      name: req.body.product_name,
+      price: Number(req.body.price),
+      description: req.body.description,
+      image_file: req.file.filename,
+    };
 
     if (!product.name || !product.price) {
       const error = new Error('Please fill in all required fields!');
@@ -57,7 +88,7 @@ productsRouter.post(
 
     products.addProductToDatabase(product, quantity, category_ids, (err) => {
       if (err) return next(err);
-      res.status(201).json({ message: 'Product Sucessfully Added!' });
+      res.status(201).json({ message: 'Product Successfully Added!' });
     });
   }
 );

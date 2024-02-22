@@ -27,6 +27,7 @@ module.exports = {
           price: 'product.price',
           description: 'product.description',
           qty_in_stock: 'product_inventory.quantity',
+          image_file: 'product.image_file',
         });
 
       if (results.length < 1) {
@@ -51,6 +52,28 @@ module.exports = {
       }
 
       done(null, results);
+    } catch (err) {
+      done(err);
+    }
+  },
+
+  addCategory: async (category, done) => {
+    try {
+      const categoryExists = await knex
+        .select()
+        .from('category')
+        .where('name', category);
+      if (categoryExists.length > 0) {
+        const error = new Error(`Category ${category} already exists!`);
+        error.status = 400;
+        return done(error);
+      }
+
+      const response = await knex('category').insert({ name: category }, [
+        'id',
+        'name',
+      ]);
+      done(null, response);
     } catch (err) {
       done(err);
     }
@@ -105,6 +128,7 @@ module.exports = {
         price: 'product.price',
         description: 'product.description',
         qty_in_stock: 'product_inventory.quantity',
+        image_file: 'product.image_file',
       });
 
     try {
@@ -140,6 +164,7 @@ module.exports = {
           price: 'product.price',
           description: 'product.description',
           qty_in_stock: 'product_inventory.quantity',
+          image_file: 'product.image_file',
         });
 
       if (!results) {

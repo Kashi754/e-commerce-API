@@ -17,6 +17,7 @@ const getCartById = async (cartId, done) => {
         id: 'product.id',
         name: 'product.name',
         price: 'product.price',
+        image_file: 'product.image_file',
         qty: 'cart_product.quantity',
       });
 
