@@ -6,7 +6,6 @@ const passport = require('passport');
 const session = require('express-session');
 const rateLimiterMiddleware = require('./middleware/rateLimiterPostgres');
 const forceHttps = require('./middleware/forceHttps');
-const path = require('path');
 
 // Import Passport config
 require('./config/passport');
@@ -104,13 +103,12 @@ app.use('/', apiRouter);
 // ErrorHandler
 
 const jsonErrorHandler = (err, _req, res) => {
-  console.log(path.join(__dirname, '..', 'public'));
-  res.status
-    ? res.status(err.status || 500).json({
-        status: err.status || 500,
-        message: err.message,
-      })
-    : res();
+  console.log('THIS IS THE ERROR: ', err);
+  if (res.status)
+    res.status(err.status || 500).json({
+      status: err.status || 500,
+      message: err.message,
+    });
 };
 
 if (process.env.NODE_ENV === 'development') {

@@ -9,7 +9,11 @@ loginRouter.get('/success', (req, res, next) => {
   } else {
     const error = new Error('Please Log In!');
     error.status = 401;
-    return next(error);
+    next(error);
+    // res.status(401).json({
+    //   status: error.status,
+    //   message: error.message,
+    // });
   }
 });
 
