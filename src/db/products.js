@@ -100,12 +100,18 @@ module.exports = {
       )
       .join('category', 'product_category.category_id', '=', 'category.id');
 
-    const searchQueryBuilder = (builder) => {
+    let searchQueryBuilder = (builder) => {
       builder
         .whereILike('product.name', searchFilter)
         .orWhereILike('product.description', searchFilter)
         .orWhereILike('category.name', searchFilter);
     };
+
+    let productId = parseInt(searchTerm);
+    if (productId) {
+      searchQueryBuilder = (builder) =>
+        builder.where('product.id', '=', productId);
+    }
 
     const categoryQueryBuilder = (builder) => {
       searchTerm
