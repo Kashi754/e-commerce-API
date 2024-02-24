@@ -34,22 +34,48 @@ productsRouter.get('/', async (req, res, next) => {
     priceGreaterThan: req.query.price_greater_than || null,
   };
 
+  let productsResults;
+
   if (!searchTerm && !categoryId) {
-    products.getAllProducts(filters, (err, results) => {
+    await products.getAllProducts(filters, (err, results) => {
       if (err) return next(err);
-      return res.status(200).json(results);
+      productsResults = results;
     });
   } else {
-    products.findProductsByFilter(
+    await products.findProductsByFilter(
       searchTerm,
       filters,
       categoryId,
       (err, results) => {
         if (err) return next(err);
-        res.status(200).json(results);
+        productsResults = results;
       }
     );
   }
+
+  if (productsResults.length < 1) {
+    const error = new Error('No products found!');
+    error.status = 404;
+    return next(error);
+  }
+
+  const response = productsResults.map(async (product) => {
+    let categories;
+
+    await products.getCategoriesForProduct(product.id, (err, results) => {
+      if (err) return next(err);
+      categories = results;
+    });
+
+    return {
+      ...product,
+      categories,
+    };
+  });
+
+  Promise.all(response).then((results) => {
+    res.json(results);
+  });
 });
 
 productsRouter.get('/categories', async (req, res, next) => {
@@ -77,7 +103,7 @@ productsRouter.post(
       name: req.body.product_name,
       price: Number(req.body.price),
       description: req.body.description,
-      image_file: req.file.filename,
+      image_file: req.file?.filename || null,
     };
 
     if (!product.name || !product.price) {
@@ -109,8 +135,17 @@ productsRouter.get('/:productId', (req, res, next) => {
 
 productsRouter.put(
   '/:productId',
-  [verifyUserLoggedIn, verifyUserIsAdmin],
+  [verifyUserLoggedIn, verifyUserIsAdmin, upload.single('image')],
   (req, res, next) => {
+    const quantity = req.body.quantity || 0;
+    const category_ids =
+      JSON.parse(req.body.categories).map((id) => Number(id)) || [];
+    const product = {
+      name: req.body.product_name,
+      price: Number(req.body.price),
+      description: req.body.description,
+      image_file: req.file?.filename || null,
+    };
     const productId = Number(req.params.productId);
     if (!productId) {
       const error = new Error('Please input a number for Product ID');
@@ -130,10 +165,16 @@ productsRouter.put(
         }
       }
 
-    products.editProductById(productId, req.body, (err, results) => {
-      if (err) return next(err);
-      res.json(results);
-    });
+    products.editProductById(
+      productId,
+      product,
+      quantity,
+      category_ids,
+      (err) => {
+        if (err) return next(err);
+        res.status(201).json({ message: 'Product Successfully Updated!' });
+      }
+    );
   }
 );
 
