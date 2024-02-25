@@ -103,7 +103,7 @@ app.use('/', apiRouter);
 // ErrorHandler
 
 const jsonErrorHandler = (err, _req, res) => {
-  console.log('THIS IS THE ERROR: ', err);
+  console.error(err);
   if (res.status)
     res.status(err.status || 500).json({
       status: err.status || 500,

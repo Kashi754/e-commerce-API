@@ -266,3 +266,19 @@ exports.deleteUserById = async (id, done) => {
     done(err);
   }
 };
+
+exports.editPassword = async (id, passwordHash, done) => {
+  try {
+    const response = await knex('user')
+      .where('id', id)
+      .update({ password_hash: passwordHash });
+    if (!response) {
+      const error = new Error(`User with ID ${id} not found!`);
+      error.status = 404;
+      return done(error);
+    }
+    done(null);
+  } catch (err) {
+    done(err);
+  }
+};

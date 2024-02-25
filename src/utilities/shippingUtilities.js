@@ -45,8 +45,6 @@ exports.fetchShippingServiceTypes = async (cart, zip, accessToken) => {
 
   if (!response.ok) {
     const error = await response.json();
-    console.log('Services Path Failed!!!!');
-    console.log(error);
     throw error;
   }
   const shippingServices = await response.json();
@@ -115,8 +113,6 @@ exports.fetchTransitTimes = async (_cart, _zip, accessToken, serviceTypes) => {
 
   if (!response.ok) {
     const error = await response.json();
-    console.log('Transit Times Path Failed!!!!!');
-    console.log(error);
     throw error;
   }
 
@@ -195,8 +191,6 @@ exports.fetchShippingRates = async (
 
   if (!response.ok) {
     const error = await response.json();
-    console.log('Shipping Rates Path Failed!!!!!');
-    console.log(error);
     throw error;
   }
 
@@ -298,8 +292,6 @@ exports.createNewShipment = async (
 
   if (!response.ok) {
     const error = await response.json();
-    console.log('Shipping Rates Path Failed!!!!!');
-    console.log(error);
     throw error;
   }
 

@@ -18,7 +18,7 @@ secretRouter.get('/', async (req, res, next) => {
     const intent = paymentIntent;
     res.json({ client_secret: intent.client_secret });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     err.status = 500;
     return next(err);
   }

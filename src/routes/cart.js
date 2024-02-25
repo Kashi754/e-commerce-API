@@ -94,7 +94,7 @@ cartRouter.get('/shipping', async (req, res, next) => {
 
   if (!response.ok) {
     const error = await response.json();
-    console.log(error);
+    console.error(error);
     error.status = 500;
     return next(error);
   }

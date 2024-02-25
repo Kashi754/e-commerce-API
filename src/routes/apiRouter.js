@@ -25,5 +25,8 @@ apiRouter.use('/webhook', webhookRouter);
 apiRouter.get('/openapi.json', (_req, res) => {
   res.json(openApi);
 });
+apiRouter.use('/*', (_req, res) => {
+  res.sendStatus(404);
+});
 
 module.exports = apiRouter;

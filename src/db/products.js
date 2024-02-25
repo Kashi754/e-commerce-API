@@ -142,14 +142,14 @@ module.exports = {
 
       if (results.length < 1) {
         const error = new Error('No products found!');
-        console.log(error);
+        console.error(error);
         error.status = 404;
         return done(error);
       }
 
       done(null, results);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       done(err);
     }
   },
@@ -166,7 +166,7 @@ module.exports = {
 
       done(null, results);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       done(err);
     }
   },

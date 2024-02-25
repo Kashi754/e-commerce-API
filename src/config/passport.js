@@ -10,7 +10,7 @@ passport.use(
     await users.findUserAuth(username, async (err, user) => {
       if (!user || err) {
         const error = new Error('Incorrect username or password.');
-        console.log(error);
+        console.error(error);
         return done(error);
       }
       const matchedPassword = await bcrypt.compare(
