@@ -102,18 +102,17 @@ app.use('/', apiRouter);
 
 // ErrorHandler
 
-const jsonErrorHandler = (err, _req, res) => {
+// eslint-disable-next-line no-unused-vars
+const jsonErrorHandler = (err, req, res, next) => {
   console.error(err);
   if (res.status)
-    res.status(err.status || 500).json({
+    res.status(err.status || 500).send({
       status: err.status || 500,
-      message: err.message,
+      message: { status: err.status || 500, message: err.message },
     });
 };
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(jsonErrorHandler);
-}
+app.use(jsonErrorHandler);
 
 // Spin Up the Server
 app.listen(PORT, () => {

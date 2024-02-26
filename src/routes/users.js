@@ -82,11 +82,11 @@ usersRouter.get('/admin', async (req, res, next) => {
       res.json(users);
     });
   } else if (filter) {
-    await users.getUserByEmail(filter, (err, user) => {
+    await users.getUserByEmailOrUsername(filter, (err, users) => {
       if (err) {
         return next(err);
       }
-      res.json([user]);
+      res.json(users);
     });
   } else {
     await users.getUsers((err, users) => {

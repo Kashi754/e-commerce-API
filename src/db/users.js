@@ -212,7 +212,7 @@ exports.getUsersByRole = async (role, done) => {
   done(null, users);
 };
 
-exports.getUserByEmail = async (email, done) => {
+exports.getUserByEmailOrUsername = async (filter, done) => {
   const users = await knex('user')
     .select({
       id: 'user.id',
@@ -222,9 +222,10 @@ exports.getUserByEmail = async (email, done) => {
       last_name: 'user.last_name',
       role: 'user.role',
     })
-    .where('email', email);
+    .whereILike('email', `%${filter}%`)
+    .orWhereILike('username', `%${filter}%`);
 
-  if (!users) {
+  if (users.length < 1) {
     const error = new Error('Users not found!');
     error.status = 404;
     return done(error);
