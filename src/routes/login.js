@@ -9,19 +9,17 @@ loginRouter.get('/success', (req, res, next) => {
   } else {
     const error = new Error('Please Log In!');
     error.status = 401;
-    next(error);
-    // res.status(401).json({
-    //   status: error.status,
-    //   message: error.message,
-    // });
+    return next(error);
   }
 });
 
 loginRouter.get('/failed', (req, _res, next) => {
-  const message = req.session.error || 'failure';
+  const message = req.session.error.message || 'failure';
+  const status = req.session.error.status || 401;
   const error = new Error(message);
+  console.log(req.session.error);
   error.status = 401;
-  return next(error);
+  return next({ status, message });
 });
 
 loginRouter.post(
@@ -30,12 +28,15 @@ loginRouter.post(
   (req, res) => {
     // const user = req.user;
     // return res.json(user);
+    console.log('Login Successful!');
     res.redirect('/login/success');
   },
-  (err, req, res) => {
-    if (err) {
-      req.session.error = 'Incorrect Username or Password';
-      res.redirect('/login/failed');
+  (err, req, res, next) => {
+    if (req.authError) {
+      console.log('Login Failed!');
+      const error = req.authError;
+      error.status = 401;
+      return next(error);
     }
   }
 );

@@ -42,7 +42,7 @@ cartRouter.put('/', async (req, res, next) => {
 });
 
 cartRouter.delete('/', async (req, res, next) => {
-  const productId = Number(req.query.product_id);
+  const productId = req.query.product_id;
 
   if (!productId) {
     const error = new Error('Please input a number for the product ID!');
@@ -94,7 +94,6 @@ cartRouter.get('/shipping', async (req, res, next) => {
 
   if (!response.ok) {
     const error = await response.json();
-    console.error(error);
     error.status = 500;
     return next(error);
   }

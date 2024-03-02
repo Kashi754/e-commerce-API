@@ -8,13 +8,8 @@ registerRouter.post('/', async (req, res, next) => {
   //Implement Post to add a new user
   const user = req.body;
   try {
-    if (
-      !user.username ||
-      !user.email ||
-      !user.first_name ||
-      !user.last_name ||
-      !user.password
-    ) {
+    console.log(user);
+    if (!user.username || !user.email || !user.password || !user.first_name) {
       const error = new Error('Please fill in all required fields!');
       error.status = 400;
       return next(error);
@@ -30,7 +25,14 @@ registerRouter.post('/', async (req, res, next) => {
     const hash = await bcrypt.hash(user.password, salt);
     user.password_hash = hash;
     delete user.password;
-    user.role = req.user.role === 'admin' ? user.role : 'user';
+    user.role = !req.user
+      ? 'user'
+      : !req.user.role === 'admin'
+        ? 'user'
+        : !user.role
+          ? 'user'
+          : user.role;
+
     await users.createUser(user, (err) => {
       if (err) return next(err);
       res.status(201).send(user);

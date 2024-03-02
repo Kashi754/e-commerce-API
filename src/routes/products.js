@@ -35,10 +35,11 @@ productsRouter.get('/', async (req, res, next) => {
   };
 
   let productsResults;
+  let error;
 
   if (!searchTerm && !categoryId) {
     await products.getAllProducts(filters, (err, results) => {
-      if (err) return next(err);
+      if (err) error = err;
       productsResults = results;
     });
   } else {
@@ -47,25 +48,23 @@ productsRouter.get('/', async (req, res, next) => {
       filters,
       categoryId,
       (err, results) => {
-        if (err) return next(err);
+        if (err) error = err;
         productsResults = results;
       }
     );
   }
 
-  if (productsResults.length < 1) {
-    const error = new Error('No products found!');
-    error.status = 404;
-    return next(error);
-  }
+  if (error) return next(error);
 
   const response = productsResults.map(async (product) => {
     let categories;
 
     await products.getCategoriesForProduct(product.id, (err, results) => {
-      if (err) return next(err);
+      if (err) error = err;
       categories = results;
     });
+
+    if (error) return next(error);
 
     return {
       ...product,
@@ -120,7 +119,7 @@ productsRouter.post(
 );
 
 productsRouter.get('/:productId', (req, res, next) => {
-  const productId = Number(req.params.productId);
+  const productId = req.params.productId;
   if (!productId) {
     const error = new Error('Please input a number for Product ID');
     error.status = 400;
@@ -144,9 +143,9 @@ productsRouter.put(
       name: req.body.product_name,
       price: Number(req.body.price),
       description: req.body.description,
-      image_file: req.file?.filename || null,
+      image_file: req.file?.filename || req.body.image_file || null,
     };
-    const productId = Number(req.params.productId);
+    const productId = req.params.productId;
     if (!productId) {
       const error = new Error('Please input a number for Product ID');
       error.status = 400;

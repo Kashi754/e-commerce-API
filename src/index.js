@@ -104,11 +104,10 @@ app.use('/', apiRouter);
 
 // eslint-disable-next-line no-unused-vars
 const jsonErrorHandler = (err, req, res, next) => {
-  console.error(err);
   if (res.status)
     res.status(err.status || 500).send({
       status: err.status || 500,
-      message: { status: err.status || 500, message: err.message },
+      message: err.message || 'Internal Server Error',
     });
 };
 

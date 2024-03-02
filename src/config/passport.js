@@ -6,21 +6,33 @@ const bcrypt = require('bcrypt');
 const users = require('../db/db').users;
 
 passport.use(
-  new LocalStrategy(async function (username, password, done) {
+  new LocalStrategy({ passReqToCallback: true }, async function (
+    req,
+    username,
+    password,
+    done
+  ) {
     await users.findUserAuth(username, async (err, user) => {
-      if (!user || err) {
-        const error = new Error('Incorrect username or password.');
-        console.error(error);
-        return done(error);
+      if (err) {
+        req.authError = err;
+        return done(null, false);
       }
+
+      if (!user) {
+        req.authError = 'Incorrect username or password.';
+        return done(null, false);
+      }
+
       const matchedPassword = await bcrypt.compare(
         password,
         user.password_hash
       );
+
       if (!matchedPassword) {
-        console.log('Incorrect password');
+        req.authError = 'Incorrect username or password.';
         return done(null, false);
       }
+
       delete user.password_hash;
 
       console.log(`User successfully logged in as ${user.username}!`);

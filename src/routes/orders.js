@@ -4,7 +4,7 @@ const orders = require('../db/db').orders;
 const ordersRouter = express.Router();
 
 async function verifyUserOrder(req, res, next) {
-  const orderId = Number(req.params.orderId);
+  const orderId = req.params.orderId;
 
   if (!orderId) {
     const error = new Error('Please input a number for order ID');

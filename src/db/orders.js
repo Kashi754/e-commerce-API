@@ -61,6 +61,7 @@ exports.getOrderById = async (orderId, done) => {
         name: 'product.name',
         price: 'product.price',
         qty: 'order_items.quantity',
+        image_file: 'product.image_file',
       });
 
     const shipping_address = await knex('address')
