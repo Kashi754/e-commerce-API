@@ -104,6 +104,24 @@ productsRouter.post(
   }
 );
 
+productsRouter.get('/categories', async (req, res, next) => {
+  products.getAllCategories((err, results) => {
+    if (err) return next(err);
+    res.json(results);
+  });
+});
+
+productsRouter.post(
+  '/categories',
+  [verifyUserLoggedIn, verifyUserIsAdmin],
+  async (req, res, next) => {
+    products.addCategory(req.body.name, (err, results) => {
+      if (err) return next(err);
+      res.json(results[0]);
+    });
+  }
+);
+
 productsRouter.get('/:productId', (req, res, next) => {
   const productId = req.params.productId;
 
@@ -150,24 +168,6 @@ productsRouter.put(
         res.status(201).json({ message: 'Product Successfully Updated!' });
       }
     );
-  }
-);
-
-productsRouter.get('/categories', async (req, res, next) => {
-  products.getAllCategories((err, results) => {
-    if (err) return next(err);
-    res.json(results);
-  });
-});
-
-productsRouter.post(
-  '/categories',
-  [verifyUserLoggedIn, verifyUserIsAdmin],
-  async (req, res, next) => {
-    products.addCategory(req.body.name, (err, results) => {
-      if (err) return next(err);
-      res.json(results[0]);
-    });
   }
 );
 
