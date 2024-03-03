@@ -22,6 +22,9 @@ apiRouter.use('/cart', verifyUserLoggedIn, cartRouter);
 apiRouter.use('/orders', verifyUserLoggedIn, ordersRouter);
 apiRouter.use('/secret', verifyUserLoggedIn, secretRouter);
 apiRouter.use('/webhook', webhookRouter);
+apiRouter.get('/health', (_req, res) => {
+  res.sendStatus(200);
+});
 apiRouter.get('/openapi.json', (_req, res) => {
   res.json(openApi);
 });
