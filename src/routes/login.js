@@ -17,7 +17,6 @@ loginRouter.get('/failed', (req, _res, next) => {
   const message = req.session.error.message || 'failure';
   const status = req.session.error.status || 401;
   const error = new Error(message);
-  console.log(req.session.error);
   error.status = 401;
   return next({ status, message });
 });

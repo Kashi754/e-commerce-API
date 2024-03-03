@@ -112,41 +112,55 @@ cartRouter.get('/shipping', async (req, res, next) => {
 });
 
 // Retrieves shipping services with rates and transit times from Fedex API
-cartRouter.post('/shipping', async (req, res) => {
+cartRouter.post('/shipping', async (req, res, next) => {
   const { cartInfo, zip, accessToken } = req.body;
-  const serviceTypes = await fetchShippingServiceTypes(cart, zip, accessToken);
-  // Returns { serviceType, serviceName, transitDays}
-  const transitTimes = await fetchTransitTimes(
-    cartInfo,
-    zip,
-    accessToken,
-    serviceTypes
-  );
-  // Returns { serviceType, totalCharge }
-  const shippingRates = await fetchShippingRates(
-    cartInfo,
-    zip,
-    accessToken,
-    serviceTypes,
-    'LIST'
-  );
+  try {
+    const serviceTypes = await fetchShippingServiceTypes(
+      cartInfo,
+      zip,
+      accessToken
+    );
+    // Returns { serviceType, serviceName, transitDays}
+    const transitTimes = await fetchTransitTimes(
+      cartInfo,
+      zip,
+      accessToken,
+      serviceTypes
+    );
+    // Returns { serviceType, totalCharge }
+    const shippingRates = await fetchShippingRates(
+      cartInfo,
+      zip,
+      accessToken,
+      serviceTypes,
+      'LIST'
+    );
 
-  // Merges transitTimes and shippingRates into an array of combined objects for each service type
-  const shippingInfo = [];
+    // Merges transitTimes and shippingRates into an array of combined objects for each service type
+    const shippingInfo = [];
 
-  for (const shippingRate of shippingRates) {
-    for (const transitTime of transitTimes) {
-      if (shippingRate.serviceType !== transitTime.serviceType) continue;
-      shippingInfo.push({
-        serviceType: shippingRate.serviceType,
-        serviceName: transitTime.serviceName,
-        transitDays: transitTime.transitDays,
-        totalCharge: shippingRate.totalCharge,
-      });
+    for (const shippingRate of shippingRates) {
+      for (const transitTime of transitTimes) {
+        if (shippingRate.serviceType !== transitTime.serviceType) continue;
+        shippingInfo.push({
+          serviceType: shippingRate.serviceType,
+          serviceName: transitTime.serviceName,
+          transitDays: transitTime.transitDays,
+          totalCharge: shippingRate.totalCharge,
+        });
+      }
     }
-  }
 
-  res.json(shippingInfo);
+    if (shippingInfo.length < 1) {
+      const error = new Error('No shipping options found!');
+      error.status = 404;
+      return next(error);
+    }
+
+    res.json(shippingInfo);
+  } catch (error) {
+    return next(error);
+  }
 });
 
 cartRouter.patch('/shipping', async (req, res, next) => {
