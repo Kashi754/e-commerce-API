@@ -77,20 +77,6 @@ productsRouter.get('/', async (req, res, next) => {
   });
 });
 
-productsRouter.get('/categories', async (req, res, next) => {
-  products.getAllCategories((err, results) => {
-    if (err) return next(err);
-    res.json(results);
-  });
-});
-
-productsRouter.post('/categories', async (req, res, next) => {
-  products.addCategory(req.body.name, (err, results) => {
-    if (err) return next(err);
-    res.json(results[0]);
-  });
-});
-
 productsRouter.post(
   '/',
   [verifyUserLoggedIn, verifyUserIsAdmin, upload.single('image')],
@@ -120,11 +106,6 @@ productsRouter.post(
 
 productsRouter.get('/:productId', (req, res, next) => {
   const productId = req.params.productId;
-  if (!productId) {
-    const error = new Error('Please input a number for Product ID');
-    error.status = 400;
-    return next(error);
-  }
 
   products.findProductsById(productId, (err, results) => {
     if (err) return next(err);
@@ -146,11 +127,6 @@ productsRouter.put(
       image_file: req.file?.filename || req.body.image_file || null,
     };
     const productId = req.params.productId;
-    if (!productId) {
-      const error = new Error('Please input a number for Product ID');
-      error.status = 400;
-      return next(error);
-    }
 
     const requiredKeys = ['quantity', 'category_ids', 'price', 'name'];
     const hasAllRequiredKeys = requiredKeys.every((key) => !!req.body[key]);
@@ -158,7 +134,7 @@ productsRouter.put(
     if (!hasAllRequiredKeys)
       for (let key in req.body) {
         if (!req.body[key] && key !== 'description') {
-          const error = new Error('Please provide all required information!');
+          const error = new Error('Please fill in all required fields!');
           error.status = 400;
           return next(error);
         }
@@ -174,6 +150,24 @@ productsRouter.put(
         res.status(201).json({ message: 'Product Successfully Updated!' });
       }
     );
+  }
+);
+
+productsRouter.get('/categories', async (req, res, next) => {
+  products.getAllCategories((err, results) => {
+    if (err) return next(err);
+    res.json(results);
+  });
+});
+
+productsRouter.post(
+  '/categories',
+  [verifyUserLoggedIn, verifyUserIsAdmin],
+  async (req, res, next) => {
+    products.addCategory(req.body.name, (err, results) => {
+      if (err) return next(err);
+      res.json(results[0]);
+    });
   }
 );
 

@@ -35,7 +35,6 @@ passport.use(
 
       delete user.password_hash;
 
-      console.log(`User successfully logged in as ${user.username}!`);
       return done(null, user);
     });
   })

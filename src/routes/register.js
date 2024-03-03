@@ -8,7 +8,6 @@ registerRouter.post('/', async (req, res, next) => {
   //Implement Post to add a new user
   const user = req.body;
   try {
-    console.log(user);
     if (!user.username || !user.email || !user.password || !user.first_name) {
       const error = new Error('Please fill in all required fields!');
       error.status = 400;

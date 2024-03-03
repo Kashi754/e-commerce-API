@@ -27,14 +27,27 @@
       "description": "Operations about User's Cart"
     },
     {
-      "name": "Order",
+      "name": "Orders",
       "description": "Operations about User's Orders"
+    },
+    {
+      "name": "Shipping",
+      "description": "Fedex shipping api"
+    },
+    {
+      "name": "Categories",
+      "description": "Operations about Categories"
+    },
+    {
+      "name": "Secret",
+      "description": "Stripe client secret"
+    },
+    {
+      "name": "Checkout",
+      "description": "Stripe payment intent"
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
+  "schemes": ["https", "http"],
   "paths": {
     "/register": {
       "summary": "Register a new user",
@@ -57,11 +70,11 @@
           "201": {
             "description": "A successful response",
             "content": {
-              "text/plain; charset=utf-8": {
+              "application/json": {
                 "example": {
-                  "Message": {
-                    "value": "Success! New User Created"
-                  }
+                  "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                  "username": "example_user",
+                  "email": "user@email.com"
                 }
               }
             }
@@ -69,23 +82,27 @@
           "400": {
             "description": "Missing Required Information (username, email, password, first name, last name)",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please fill in all required fields"
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Please fill in all required fields"
+                }
               }
             }
           },
           "422": {
             "description": "User with given email/username already exists",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "User with that username or email already exists"
+              "application/json": {
+                "example": {
+                  "status": 422,
+                  "message": "User with that username or email already exists"
+                }
               }
             }
           }
         },
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       }
     },
     "/login": {
@@ -101,8 +118,8 @@
             "application/json": {
               "schema": {
                 "anyOf": [
-                  {"$ref": "#/components/schemas/username_login"},
-                  {"$ref": "#/components/schemas/email_login"}
+                  { "$ref": "#/components/schemas/username_login" },
+                  { "$ref": "#/components/schemas/email_login" }
                 ]
               }
             }
@@ -114,31 +131,69 @@
             "content": {
               "application/json": {
                 "example": {
-                  "user": 1
+                  "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                  "username": "example_user",
+                  "email": "user@email.com",
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "role": "user",
+                  "cartId": 1
                 }
               }
             }
           },
           "401": {
-            "description": "Incorrect Password",
+            "description": "Incorrect Username or Password",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Unauthorized"
-              }
-            }
-          },
-          "404": {
-            "description": "User not found",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "User with username {username} not found!"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Incorrect username or password."
+                }
               }
             }
           }
         },
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
+      }
+    },
+    "/login/success": {
+      "summary": "Verify Logged in User",
+      "description": "This path is used to verify a user is logged in to the API, and return the user's details",
+      "get": {
+        "summary": "Verify user session",
+        "description": "Send request to the server and return user if a valid session exists",
+        "operationId": "user_session",
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                  "username": "example_user",
+                  "email": "user@email.com",
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "role": "user",
+                  "cartId": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No User session exists",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["User"]
       }
     },
     "/logout": {
@@ -152,8 +207,10 @@
           "204": {
             "description": "A successful response",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Successfully logged out!"
+              "application/json": {
+                "example": {
+                  "message": "Successfully logged out!"
+                }
               }
             }
           },
@@ -161,80 +218,21 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          }
-        },
-        "tags": [
-          "User"
-        ]
-      }
-    },
-    "/users/{userId}": {
-      "summary": "The user's information",
-      "description": "Operate on a user's information given a user Id",
-      "get": {
-        "summary": "Get user's information",
-        "description": "Request the information for a specific user, if that user is the current logged in user.",
-        "operationId": "get_user",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "description": "The id of the user.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A successful response",
-            "content": {
               "application/json": {
                 "example": {
-                  "id": 1,
-                  "username": "test_user",
-                  "email": "john_doe@email.com",
-                  "first_name": "John",
-                  "last_name": "Doe",
-                  "cart_id": 1
+                  "status": 401,
+                  "message": "Please Log In!"
                 }
               }
             }
-          },
-          "401": {
-            "description": "Not logged in",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to view User with that ID"
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "User with ID {userId} not found"
-              }
-            }
           }
         },
-        "tags": [
-          "User"
-        ]
-      },
+        "tags": ["User"]
+      }
+    },
+    "/users": {
+      "summary": "The user's information",
+      "description": "Edit user's information",
       "put": {
         "summary": "Edit user's information",
         "description": "Edit information for a specific user, if that user is the logged in user and return the changed user information.",
@@ -252,11 +250,11 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "path",
+            "in": "query",
             "description": "The id of the user.",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "integer"
+              "type": "uuid"
             }
           }
         ],
@@ -266,11 +264,12 @@
             "content": {
               "application/json": {
                 "example": {
-                    "id": 1,
-                    "username": "test_user,",
-                    "email": "john_doe@email.com",
-                    "first_name": "John,",
-                    "last_name": "Doe"
+                  "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                  "username": "test_user",
+                  "email": "john_doe@email.com",
+                  "first_name": "John,",
+                  "last_name": "Doe",
+                  "role": "user"
                 }
               }
             }
@@ -278,31 +277,370 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to edit User with that ID!"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
               }
             }
           },
           "404": {
             "description": "Not found",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "User with ID {userId} not found"
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User with ID {userId} not found"
+                }
               }
             }
           }
         },
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
+      }
+    },
+    "/users/password": {
+      "summary": "User Password Operations",
+      "description": "Change user's password",
+      "put": {
+        "summary": "Change user's password",
+        "description": "Change password for a specific user, if that user is the logged in user and return the changed user information.",
+        "operationId": "put_user_password",
+        "requestBody": {
+          "description": "User Password",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_password_update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Password changed successfully!"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in or incorrect password",
+            "content": {
+              "application/json": {
+                "example1": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                },
+                "example2": {
+                  "status": 401,
+                  "message": "Incorrect Password"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not logged in or incorrect password",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User with ID <userId> not found"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["User"]
+      }
+    },
+    "/users/admin": {
+      "summary": "User Admin Operations",
+      "description": "Get users",
+      "get": {
+        "summary": "Get a list of users",
+        "description": "Administrator can get a list of users filtered by email, username, or role",
+        "operationId": "get_users",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "filter response by email, username, or role",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                    "username": "test_user",
+                    "email": "john_doe@email.com",
+                    "first_name": "John,",
+                    "last_name": "Doe",
+                    "role": "user"
+                  },
+                  {
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                    "username": "test_user2",
+                    "email": "jane_doe@email.com",
+                    "first_name": "Jane,",
+                    "last_name": "Doe",
+                    "role": "admin"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "No User session exists",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not administrator",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid filter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Users not found!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["User"]
+      }
+    },
+    "/users/admin/{userId}": {
+      "summary": "User Admin Operations",
+      "description": "Edit a User's information",
+      "patch": {
+        "summary": "Edit user's information",
+        "description": "Administrator can edit the email address and role for a specific user, return the list of users with updated information.",
+        "operationId": "patch_user",
+        "requestBody": {
+          "description": "Updated User email and role",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user_patch"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "uuid"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "filter response by email or username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                    "username": "test_user",
+                    "email": "john_doe@email.com",
+                    "first_name": "John,",
+                    "last_name": "Doe",
+                    "role": "user"
+                  },
+                  {
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                    "username": "test_user2",
+                    "email": "jane_doe@email.com",
+                    "first_name": "Jane,",
+                    "last_name": "Doe",
+                    "role": "admin"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Invalid Input!"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No User session exists",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not administrator",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or invalid filter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User with ID <userId> not found"
+                },
+                "example2": {
+                  "status": 404,
+                  "message": "Users not found!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["User"]
+      },
+      "delete": {
+        "summary": "Delete a user",
+        "description": "Administrator can delete a specific user, return the list of users with updated information.",
+        "operationId": "delete_user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "uuid"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "filter response by email or username",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                    "username": "test_user",
+                    "email": "john_doe@email.com",
+                    "first_name": "John,",
+                    "last_name": "Doe",
+                    "role": "user"
+                  },
+                  {
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                    "username": "test_user2",
+                    "email": "jane_doe@email.com",
+                    "first_name": "Jane,",
+                    "last_name": "Doe",
+                    "role": "admin"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "No User session exists",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not administrator",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or invalid filter",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "User with ID <userId> not found"
+                },
+                "example2": {
+                  "status": 404,
+                  "message": "Users not found!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["User"]
       }
     },
     "/products": {
@@ -343,7 +681,7 @@
             "schema": {
               "type": "number"
             },
-            "description": "Search for products with a price greather than this"
+            "description": "Search for products with a price greater than this"
           }
         ],
         "responses": {
@@ -353,19 +691,20 @@
               "application/json": {
                 "example": [
                   {
-                    "id": 1,
+                    "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
                     "name": "example_product1",
                     "price": "$5.00",
                     "description": "Description",
-                    "qty_in_stock": 100
-                    
+                    "qty_in_stock": 100,
+                    "image_file": "image-1709469725513.jpg"
                   },
                   {
                     "id": 2,
                     "name": "example_product2",
-                    "price\"": "$5.00",
-                    "description\"": "Description",
-                    "qty_in_stock\"": 100
+                    "price": "$5.00",
+                    "description": "Description",
+                    "qty_in_stock": 100,
+                    "image_file": "image-1709469725602.jpg"
                   }
                 ]
               }
@@ -374,26 +713,32 @@
           "404": {
             "description": "Not found",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "No products found"
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No products found"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Products"
-        ]
+        "tags": ["Products"]
       },
       "post": {
         "summary": "Insert new products into the database",
-        "description": "Allows a user with the 'admin' role to add new products to the database.",
+        "description": "Allows an administrator to add new products to the database.",
         "operationId": "post_products",
         "requestBody": {
           "description": "Product Information",
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/product_update"
+              },
+              "encoding": {
+                "image": {
+                  "contentType": "image/*"
+                }
               }
             }
           }
@@ -403,43 +748,47 @@
             "description": "A successful response",
             "content": {
               "application/json": {
-                "example": [
-                  {
-                    "id": 1,
-                    "name": "example_product1",
-                    "price": "$5.00",
-                    "description": "Description",
-                    "qty_in_stock": 100,
-                    "categories": [
-                      "electronics",
-                      "computers",
-                      "accessories"
-                    ]
-                  }
-                ]
+                "example": {
+                  "message": "Product Successfully Added!"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Please fill in all required fields!"
+                }
               }
             }
           },
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
               }
             }
           },
           "403": {
             "description": "Unauthorized",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to do that."
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Products"
-        ]
+        "tags": ["Products"]
       }
     },
     "/products/{productId}": {
@@ -456,7 +805,7 @@
             "description": "The id of the product.",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "uuid"
             }
           }
         ],
@@ -470,7 +819,8 @@
                   "name": "example_product",
                   "price": "$5.00",
                   "description": "This is a description of the product",
-                  "qty_in_stock": 100
+                  "qty_in_stock": 100,
+                  "image_file": "image-1709469725513.jpg"
                 }
               }
             }
@@ -478,26 +828,32 @@
           "404": {
             "description": "Not found",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Product with ID {productId} not found"
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Product with ID {productId} not found"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Products"
-        ]
+        "tags": ["Products"]
       },
-      "patch": {
+      "put": {
         "summary": "Edit product's information",
-        "description": "Allows a user with the 'admin' role to edit information for a specific product and return the changed product information.",
+        "description": "Allows a user with the 'admin' role to edit information for a specific product.",
         "operationId": "put_product",
         "requestBody": {
           "description": "Product Information",
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/product_update"
+              },
+              "encoding": {
+                "image": {
+                  "contentType": "image/*"
+                }
               }
             }
           }
@@ -518,71 +874,200 @@
             "description": "A successful response",
             "content": {
               "application/json": {
-                "example": [
-                  {
-                    "id": 1,
-                    "name": "example_product1",
-                    "price": "$5.00",
-                    "description": "Description",
-                    "qty_in_stock": 100,
-                    "categories": [
-                      "electronics",
-                      "computers",
-                      "accessories"
-                    ]
-                  }
-                ]
+                "example": {
+                  "message": "Product Successfully Updated!"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Please fill in all required fields!"
+                }
               }
             }
           },
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
               }
             }
           },
           "403": {
             "description": "Unauthorized",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to do that."
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Products"]
+      }
+    },
+    "/products/categories": {
+      "summary": "Category information",
+      "description": "View or add categories",
+      "get": {
+        "summary": "Get list of product categories",
+        "description": "Returns a list of all product categories.",
+        "operationId": "get_categories",
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "toiletries"
+                  },
+                  {
+                    "id": 2,
+                    "name": "electronics"
+                  }
+                ]
               }
             }
           },
           "404": {
             "description": "Not found",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Product with ID {productId} not found"
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No categories found!"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Products"
-        ]
-      }
-    },
-    "/cart/{cartId}": {
-      "summary": "The user's cart information",
-      "description": "Operate on a user's cart given a cart Id",
-      "get": {
-        "summary": "Get user's cart information",
-        "description": "Request the information for a specific user's cart, if that user is the current logged in user.",
-        "operationId": "get_cart",
-        "parameters": [
-          {
-            "name": "cartId",
-            "in": "path",
-            "description": "The id of the user's cart.",
-            "required": true,
-            "schema": {
-              "type": "integer"
+        "tags": ["Products", "Categories"]
+      },
+      "post": {
+        "summary": "Add a new category",
+        "description": "Allows an administrator to add new categories.",
+        "operationId": "post_category",
+        "requestBody": {
+          "description": "Product Information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/categories_create"
+              }
             }
           }
-        ],
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 1,
+                  "name": "new_category"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 400,
+                  "message": "Category {categoryName} already exists!"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Products"]
+      }
+    },
+    "/secret": {
+      "get": {
+        "summary": "Get secret stripe secret",
+        "description": "Create a stripe payment intent and retrieve the client secret.",
+        "operationId": "get_secret",
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "client_secret": "pi_3MtwBwLkdIwHu7ix28a3tqPa_secret_YrKJUKribcBjcG8HVhfZluoGHkz5Y2bH0q9kz5"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please Log In!"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Secret"]
+      }
+    },
+    "/cart": {
+      "summary": "The user's cart information",
+      "description": "Operate on the logged in user's cart.",
+      "get": {
+        "summary": "Get user's cart information",
+        "description": "Request the information for the logged in user's cart.",
+        "operationId": "get_cart",
         "responses": {
           "200": {
             "description": "A successful response",
@@ -591,13 +1076,14 @@
                 "example": {
                   "products": [
                     {
-                      "id": 1,
+                      "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
                       "name": "example_product1",
                       "price": "$5.00",
-                      "qty": 1
+                      "qty": 1,
+                      "image_file": "image-1709469725513.jpg"
                     }
                   ],
-                  "total_price": "$5.00"
+                  "total_price": 5.24
                 }
               }
             }
@@ -605,35 +1091,20 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to interact with cart with that ID!"
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Cart with ID {cartId} not found"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please log in!"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Cart"
-        ]
+        "tags": ["Cart"]
       },
       "post": {
         "summary": "Add items to cart",
-        "description": "Add products to a specific user's cart, if that user is the logged in user and return the changed cart information.  If product already exists in cart, increment quantity by specified amount. Returns updated cart.",
+        "description": "Add products to the logged in user's cart, and return the changed cart information. Returns updated cart.",
         "operationId": "post_cart",
         "requestBody": {
           "description": "Product Information",
@@ -645,17 +1116,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "cartId",
-            "in": "path",
-            "description": "The id of the user.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "A successful response",
@@ -666,17 +1126,19 @@
                     {
                       "id": 1,
                       "name": "example_product1",
-                      "price": "$5.00",
-                      "qty": 1
+                      "price": 5.0,
+                      "qty": 1,
+                      "image_file": "image-1709469725513.jpg"
                     },
                     {
                       "id": 2,
                       "name": "example_product2",
-                      "price": "$5.00",
-                      "qty": 1
+                      "price": 5.0,
+                      "qty": 1,
+                      "image_file": "image-1709469725513.jpg"
                     }
                   ],
-                  "total_price": "$10.00"
+                  "total": 10.0
                 }
               }
             }
@@ -684,46 +1146,20 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to interact with cart with that ID!"
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "text/plain; charset=utf-8": {
+              "application/json": {
                 "example": {
-                  "Error_1": "Cart with ID {cartId} not found",
-                  "Error_2": "Product with ID {productId} not found"
+                  "status": 401,
+                  "message": "Please log in!"
                 }
-              }
-            }
-          },
-          "422": {
-            "description": "Stock not available",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Quantity {qty} exceeds available stock"
               }
             }
           }
         },
-        "tags": [
-          "Cart"
-        ]
+        "tags": ["Cart"]
       },
       "put": {
         "summary": "Update item quantity in cart",
-        "description": "Updates the quantity of a product in a specific user's cart, if that user is the logged in user and return the changed cart information. Returns updated cart.",
+        "description": "Updates the quantity of a product in the logged-in user's cart, and return the changed cart information.",
         "operationId": "put_cart",
         "requestBody": {
           "description": "Product Information",
@@ -735,17 +1171,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "cartId",
-            "in": "path",
-            "description": "The id of the user.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "A successful response",
@@ -756,17 +1181,19 @@
                     {
                       "id": 1,
                       "name": "example_product1",
-                      "price": "$5.00",
-                      "qty": 1
+                      "price": 5.0,
+                      "qty": 1,
+                      "image_file": "image-1709469725513.jpg"
                     },
                     {
                       "id": 2,
                       "name": "example_product2",
-                      "price": "$5.00",
-                      "qty": 2
+                      "price": 5.0,
+                      "qty": 2,
+                      "image_file": "image-1709469725513.jpg"
                     }
                   ],
-                  "total_price": "$15.00"
+                  "total_price": 15.0
                 }
               }
             }
@@ -774,62 +1201,39 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to interact with cart with that ID!"
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "text/plain; charset=utf-8": {
+              "application/json": {
                 "example": {
-                  "Error_1": "Cart with ID {cartId} not found",
-                  "Error_2": "Product with ID {productId} not found"
+                  "status": 401,
+                  "message": "Please log in!"
                 }
               }
             }
           },
-          "422": {
-            "description": "Stock not available",
+          "404": {
+            "description": "Cart item not found",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Quantity {qty} exceeds available stock"
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Can't edit product.  Does not exist in cart!"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Cart"
-        ]
+        "tags": ["Cart"]
       },
       "delete": {
         "summary": "Delete item from cart",
-        "description": "Delete products from a specific user's cart, if that user is the logged in user and return the changed cart information.",
+        "description": "Delete products from the logged in user's cart, and return the changed cart information.",
         "operationId": "delete_cart",
         "parameters": [
           {
-            "name": "cartId",
-            "in": "path",
-            "description": "The id of the user's cart.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
             "in": "query",
             "name": "product_id",
+            "required": true,
             "schema": {
-              "type": "integer"
+              "type": "uuid"
             },
             "description": "The id of the product to delete from the user's cart"
           }
@@ -844,11 +1248,12 @@
                     {
                       "id": 1,
                       "name": "example_product2",
-                      "price": "$5.00",
-                      "qty": 2
+                      "price": 5.0,
+                      "qty": 2,
+                      "image_file": "image-1709469725513.jpg"
                     }
                   ],
-                  "total_price": "$10.00"
+                  "total_price": "$5.00"
                 }
               }
             }
@@ -856,49 +1261,38 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to interact with cart with that ID!"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please log in!"
+                }
               }
             }
           },
           "404": {
-            "description": "Not found",
+            "description": "Cart item not found",
             "content": {
-              "text/plain; charset=utf-8": {
-                "examples": {
-                  "Error_1": {
-                    "value": "Cart with ID {cartId} not found"
-                  },
-                  "Error_2": {
-                    "value": "Product with ID {productId} not found"
-                  }
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Can't edit product.  Does not exist in cart!"
                 }
               }
             }
           }
         },
-        "tags": [
-          "Cart"
-        ]
+        "tags": ["Cart"]
       }
     },
-    "/cart/{cartId}/checkout": {
-      "summary": "Checkout a user's cart",
-      "description": "Checkout a specific user's cart, if that user is the logged in user.  Verify payment, and upon success add products to an order.",
+    "/cart/checkout": {
+      "summary": "Retrieve payment intent",
+      "description": "Add a payment intent to the user's cart.",
       "post": {
-        "summary": "Checkout the user's cart",
-        "description": "Send payment information to the server which processes the payment, and adds the current cart items to a new order, then the cart is cleared. Returns newly created order.",
+        "summary": "Create a payment intent",
+        "description": "Add a stripe payment intent (retrieved from the /secret endpoint) to the logged in user's cart in the database.",
         "operationId": "post_checkout",
         "requestBody": {
-          "description": "Payment Information",
+          "description": "Payment Intent",
           "content": {
             "application/json": {
               "schema": {
@@ -907,41 +1301,14 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "cartId",
-            "in": "path",
-            "description": "The id of the user's cart.",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "A successful response",
             "content": {
               "application/json": {
                 "example": {
-                  "products": [
-                    {
-                      "id": 1,
-                      "name": "example_product2",
-                      "price": "$5.00",
-                      "qty": 2
-                    }
-                  ],
-                  "total_price": "$10.00"
+                  "message": "payment intent pi_3MtwBwLkdIwHu7ix28a3tqPa created!"
                 }
-              }
-            }
-          },
-          "400": {
-            "description": "Missing information",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please fill out all required fields"
               }
             }
           },
@@ -953,26 +1320,161 @@
               }
             }
           },
-          "402": {
-            "description": "Declined Payment",
+          "500": {
+            "description": "Internal Server Error",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Payment declined, please try another payment method"
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to interact with cart with that ID!"
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Something went wrong!"
+                }
               }
             }
           }
         },
-        "tags": [
-          "Cart"
-        ]
+        "tags": ["Cart", "Checkout"]
+      }
+    },
+    "/cart/shipping": {
+      "summary": "Get shipping information",
+      "description": "A wrapper around the Fedex shipping api.",
+      "get": {
+        "summary": "Get access token for Fedex shipping api",
+        "description": "Allows a user to request an access token for the Fedex shipping api.",
+        "operationId": "get_shipping",
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5...",
+                  "expiresAt": 74739934,
+                  "scope": "CXS"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "{Error generated by the Fedex shipping api}"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Cart", "Shipping"]
+      },
+      "post": {
+        "summary": "Retrieve shipping information",
+        "description": "Allows a user to request shipping services and transit times from the Fedex shipping api given a total cart value and shipment weight.",
+        "operationId": "get_shipping",
+        "requestBody": {
+          "description": "Shipping information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/shipping"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "serviceType": "FEDEX_GROUND",
+                    "serviceName": "Fedex Ground",
+                    "transitDays": 7,
+                    "totalCharge": 10.0
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "{Error generated by the Fedex shipping api}"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Cart", "Shipping"]
+      },
+      "patch": {
+        "summary": "Update shipping price in database",
+        "description": "Updates the cost of shipping for the logged in user's cart in the database.",
+        "operationId": "patch_shipping",
+        "requestBody": {
+          "description": "Updated Price",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/shipping_price"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "msg": "shipping price <shippingPrice> updated!"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "example": "Please log in!"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 500,
+                  "message": "Something went wrong!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Cart", "Shipping"]
       }
     },
     "/orders": {
@@ -982,64 +1484,15 @@
         "summary": "Get list of orders",
         "description": "Search the database for and return all orders made by the current user",
         "operationId": "search_orders",
-        "responses": {
-          "200": {
-            "description": "A successful response",
-            "content": {
-              "application/json": {
-                "example": [
-                  {
-                    "id": 1,
-                    "date": "2023/02/24",
-                    "total": "$15.00",
-                    "status": "shipped"
-                  },
-                  {
-                    "id": 2,
-                    "date": "2022/04/27",
-                    "total": "$100.00",
-                    "status": "delivered"
-                  },
-                  {
-                    "id": 3,
-                    "date": "2022/03/05",
-                    "total": "$35.00",
-                    "status": "canceled"
-                  }
-                ]
-              }
-            }
-          },
-          "401": {
-            "description": "Not logged in",
-            "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
-              }
-            }
-          }
-        },
-        "tags": [
-          "Order"
-        ]
-      }
-    },
-    "/orders/{orderId}": {
-      "summary": "Order information",
-      "description": "View all orders",
-      "get": {
-        "summary": "Get an order's details by id",
-        "description": "Search the database for and return all orders made by the current user",
-        "operationId": "search_order",
         "parameters": [
           {
-            "name": "orderId",
-            "in": "path",
-            "description": "The id of the user's order.",
-            "required": true,
+            "in": "query",
+            "name": "userId",
+            "required": false,
             "schema": {
-              "type": "integer"
-            }
+              "type": "uuid"
+            },
+            "description": "The id of the user to retrieve orders for.  If user is not an admin, only their own orders will be returned."
           }
         ],
         "responses": {
@@ -1052,38 +1505,22 @@
                     "id": 1,
                     "date": "2023/02/24",
                     "total": "$15.00",
-                    "status": "delivered",
-                    "products": [
-                      {
-                        "id": 1,
-                        "price": "$5.00",
-                        "qty": 2
-                      },
-                      {
-                        "id": 2,
-                        "price": "5.00",
-                        "qty": 1
-                      }
-                    ]
+                    "shipping_status": "delivered",
+                    "payment_status": "success"
                   },
                   {
-                    "shipping_address": {
-                      "street": "1234 Example St. apt 2",
-                      "city": "Richmond",
-                      "state": "VA",
-                      "zip": 23173
-                    }
+                    "id": 2,
+                    "date": "2022/04/27",
+                    "total": "$100.00",
+                    "shipping_status": "shipped",
+                    "payment_status": "success"
                   },
                   {
-                    "payment_information": {
-                      "card_number": "xxxx-xxxx-xxxx-1234",
-                      "billing_address": {
-                        "street": "1234 Example St. apt 2",
-                        "city": "Richmond",
-                        "state": "VA",
-                        "zip": 23173
-                      }
-                    }
+                    "id": 3,
+                    "date": "2022/03/05",
+                    "total": "$35.00",
+                    "shipping_status": "pending",
+                    "payment_status": "success"
                   }
                 ]
               }
@@ -1092,16 +1529,105 @@
           "401": {
             "description": "Not logged in",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "Please log in!"
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please log in!"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No orders found for user with id <userId>!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Orders"]
+      }
+    },
+    "/orders/{orderId}": {
+      "summary": "Order information",
+      "description": "View specific order",
+      "get": {
+        "summary": "Get an order's details by id",
+        "description": "Search the database for and return the order with the given id.",
+        "operationId": "search_order",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "The id of the user's order.",
+            "required": true,
+            "schema": {
+              "type": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "00a725ab-9638-4a4b-b2da-449ec0201b07",
+                  "date": "2023/02/24",
+                  "total": 15.0,
+                  "shipping_status": "delivered",
+                  "payment_status": "success",
+                  "tracking_number": "123456789",
+                  "products": [
+                    {
+                      "id": 1,
+                      "name": "example_product",
+                      "price": 5.0,
+                      "qty": 2,
+                      "image_file": "image-1709469725513.jpg"
+                    },
+                    {
+                      "id": 2,
+                      "name": "example_product2",
+                      "price": 5.0,
+                      "qty": 1,
+                      "image_file": "image-1709469725513.jpg"
+                    }
+                  ],
+                  "shipping_address": {
+                    "addr_line_1": "123 Main St",
+                    "addr_line_2": "Suite 1",
+                    "city": "San Diego",
+                    "state": "CA",
+                    "zip_code": 92101
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please log in!"
+                }
               }
             }
           },
           "403": {
             "description": "Unauthorized",
             "content": {
-              "text/plain; charset=utf-8": {
-                "example": "You do not have permission to interact with order with that ID!"
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
               }
             }
           },
@@ -1109,14 +1635,98 @@
             "description": "Not found",
             "content": {
               "text/plain; charset=utf-8": {
-                "example": "No order found with ID {orderId}"
+                "example": "Order with ID <orderId> not found."
               }
             }
           }
         },
-        "tags": [
-          "Order"
-        ]
+        "tags": ["Orders"]
+      }
+    },
+    "/orders/admin": {
+      "summary": "Order information",
+      "description": "View all orders",
+      "get": {
+        "summary": "Get list of orders",
+        "description": "Search the database for and return all or filtered orders for all users",
+        "operationId": "search_admin_orders",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "type": ["string", "uuid"]
+            },
+            "description": "Either the shipping status, or id of the order or user."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "date": "2023/02/24",
+                    "total": "$15.00",
+                    "shipping_status": "delivered",
+                    "payment_status": "success"
+                  },
+                  {
+                    "id": 2,
+                    "date": "2022/04/27",
+                    "total": "$100.00",
+                    "shipping_status": "shipped",
+                    "payment_status": "success"
+                  },
+                  {
+                    "id": 3,
+                    "date": "2022/03/05",
+                    "total": "$35.00",
+                    "shipping_status": "pending",
+                    "payment_status": "success"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 401,
+                  "message": "Please log in!"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 403,
+                  "message": "Permission Denied!"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "No orders found!"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Orders"]
       }
     }
   },
@@ -1138,6 +1748,9 @@
             "type": "string"
           },
           "password": {
+            "type": "string"
+          },
+          "role": {
             "type": "string"
           }
         },
@@ -1187,10 +1800,34 @@
           },
           "last_name": {
             "type": "string"
+          },
+          "role": {
+            "type": "string"
           }
         },
         "xml": {
           "name": "User_Registration"
+        }
+      },
+      "user_patch": {
+        "type": "object",
+        "properties": {
+          "email": "string",
+          "role": "string"
+        }
+      },
+      "user_password_update": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User_Password_Update"
         }
       },
       "product_update": {
@@ -1213,6 +1850,10 @@
             "items": {
               "type": "integer"
             }
+          },
+          "image": {
+            "type": "string",
+            "format": "binary"
           }
         },
         "xml": {
@@ -1223,110 +1864,55 @@
         "type": "object",
         "properties": {
           "productId": {
-            "type": "integer"
+            "type": "uuid"
           },
           "qty": {
             "type": "integer"
           }
         },
         "xml": {
-          "name": "Cart_Post"
+          "name": "Cart_Update"
         }
       },
       "checkout": {
         "type": "object",
         "properties": {
-          "payment_information": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "minLength": 2,
-                "maxLength": 26,
-                "pattern": "[a-zA-Z0-9 .]*",
-                "example": "JOHN SMITH"
-              },
-              "card_number": {
-                "type": "string",
-                "minLength": 0,
-                "maxLength": 22,
-                "pattern": "[0-9]*",
-                "example": "5001878976540310"
-              },
-              "cvv": {
-                "type": "string",
-                "minLength": 3,
-                "maxLength": 5,
-                "pattern": "^[0-9]*$",
-                "example": "456"
-              },
-              "expiry": {
-                "type": "string",
-                "description": "Expiry Date of the card. Date Format: MM/YY",
-                "pattern": "^(0[1-9]|1[0-2])/[0-9]{2}$",
-                "example": "11/30"
-              }
-            }
-          },
-          "billing_address": {
-            "type": "object",
-            "properties": {
-              "addr_line_1": {
-                "type": "string"
-              },
-              "addr_line_2": {
-                "type": "string"
-              },
-              "city": {
-                "type": "string"
-              },
-              "state": {
-                "type": "string",
-                "minLength": 2,
-                "maxLength": 2,
-                "pattern": "[A-Z]*",
-                "example": "CO"
-              },
-              "zip_code": {
-                "type": "string",
-                "minLength": 5,
-                "maxLength": 5,
-                "pattern": "[0-9]*"
-              },
-              "is_shipping": {
-                "type": "boolean"
-              }
-            }
-          },
-          "shipping_address": {
-            "type": "object",
-            "properties": {
-              "addr_line_1": {
-                "type": "string"
-              },
-              "addr_line_2": {
-                "type": "string"
-              },
-              "city": {
-                "type": "string"
-              },
-              "state": {
-                "type": "string",
-                "minLength": 2,
-                "maxLength": 2,
-                "pattern": "[A-Z]*",
-                "example": "CO"
-              },
-              "zip_code": {
-                "type": "string",
-                "minLength": 5,
-                "maxLength": 5,
-                "pattern": "[0-9]*"
-              }
-            }
-          },
-          "shipping_method": {
+          "payment_intent": {
             "type": "string"
+          }
+        }
+      },
+      "categories_create": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "shipping": {
+        "type": "object",
+        "properties": {
+          "cartInfo": {
+            "type": "object",
+            "properties": {
+              "totalPrice": 10.0,
+              "totalWeight": 6.25
+            }
+          },
+          "zip": {
+            "type": "number"
+          },
+          "accessToken": {
+            "type": "string"
+          }
+        }
+      },
+      "shipping_price": {
+        "type": "object",
+        "properties": {
+          "shippingPrice": {
+            "type": "number"
           }
         }
       }

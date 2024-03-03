@@ -84,6 +84,7 @@ exports.createUser = async (user, done) => {
 
     if (!newUser) {
       const error = new Error('User not created!');
+      error.status = 500;
       return done(error);
     }
     console.log(
@@ -91,6 +92,7 @@ exports.createUser = async (user, done) => {
     );
     return done(null, newUser);
   } catch (err) {
+    err.status = 500;
     return done(err);
   }
 };
@@ -99,7 +101,14 @@ exports.editUserById = async (id, user, done) => {
   try {
     const response = await knex('user')
       .where('id', id)
-      .update(user, ['username', 'email', 'first_name', 'last_name', 'role']);
+      .update(user, [
+        'id',
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'role',
+      ]);
 
     const updatedUser = response[0];
 
@@ -212,7 +221,7 @@ exports.getUsersByRole = async (role, done) => {
   done(null, users);
 };
 
-exports.getUserByEmailOrUsername = async (filter, done) => {
+exports.getUsersByEmailOrUsername = async (filter, done) => {
   const users = await knex('user')
     .select({
       id: 'user.id',
@@ -257,7 +266,7 @@ exports.patchUserById = async (id, user, done) => {
 exports.deleteUserById = async (id, done) => {
   try {
     const response = await knex('user').where('id', id).del();
-    if (!response) {
+    if (response < 1) {
       const error = new Error(`User with ID ${id} not found!`);
       error.status = 404;
       return done(error);

@@ -26,9 +26,6 @@ loginRouter.post(
   '/',
   passport.authenticate('local', { session: true, failWithError: true }),
   (req, res) => {
-    // const user = req.user;
-    // return res.json(user);
-    console.log('Login Successful!');
     res.redirect('/login/success');
   },
   (err, req, res, next) => {

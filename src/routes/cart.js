@@ -113,18 +113,18 @@ cartRouter.get('/shipping', async (req, res, next) => {
 
 // Retrieves shipping services with rates and transit times from Fedex API
 cartRouter.post('/shipping', async (req, res) => {
-  const { cart, zip, accessToken } = req.body;
+  const { cartInfo, zip, accessToken } = req.body;
   const serviceTypes = await fetchShippingServiceTypes(cart, zip, accessToken);
   // Returns { serviceType, serviceName, transitDays}
   const transitTimes = await fetchTransitTimes(
-    cart,
+    cartInfo,
     zip,
     accessToken,
     serviceTypes
   );
   // Returns { serviceType, totalCharge }
   const shippingRates = await fetchShippingRates(
-    cart,
+    cartInfo,
     zip,
     accessToken,
     serviceTypes,

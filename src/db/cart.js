@@ -112,7 +112,7 @@ exports.editCartProduct = async (cartId, itemData, done) => {
 
     if (cartItem.length < 1) {
       const error = new Error(`Can't edit product. Does not exist in cart!`);
-      error.status = 500;
+      error.status = 404;
       return done(error);
     }
 
@@ -130,8 +130,8 @@ exports.deleteCartProduct = async (cartId, productId, done) => {
       .del();
 
     if (rowsAffected < 1) {
-      const error = new Error(`Something went wrong!`);
-      error.status = 500;
+      const error = new Error(`Can't delete product. Does not exist in cart!`);
+      error.status = 404;
       return done(error);
     }
 
@@ -155,7 +155,7 @@ exports.createPaymentIntent = async (cartId, paymentIntent, done) => {
       error.status = 500;
       return done(error);
     }
-    return done(null, { msg: `payment intent ${paymentIntent} created!` });
+    return done(null, { message: `payment intent ${paymentIntent} created!` });
   } catch (err) {
     done(err);
   }

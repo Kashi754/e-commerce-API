@@ -141,21 +141,61 @@ exports.getOrders = async (done) => {
 
 exports.getFilteredOrders = async (filter, done) => {
   try {
-    const orders = await knex('order')
-      .join('order_details', 'order.order_details_id', '=', 'order_details.id')
-      .join(
-        'shipping_details',
-        'order.shipping_details_id',
-        'shipping_details.id'
-      )
-      .where('shipping_details.shipping_status', '=', filter)
-      .select({
-        id: 'order.id',
-        date: 'order_details.created_at',
-        total: 'order_details.total_price',
-        shipping_status: 'shipping_details.shipping_status',
-        payment_status: 'order_details.payment_status',
-      });
+    let orders;
+    if (
+      filter === 'pending' ||
+      filter === 'shipped' ||
+      filter === 'delivered'
+    ) {
+      orders = await knex('order')
+        .join(
+          'order_details',
+          'order.order_details_id',
+          '=',
+          'order_details.id'
+        )
+        .join(
+          'shipping_details',
+          'order.shipping_details_id',
+          'shipping_details.id'
+        )
+        .where('shipping_details.shipping_status', '=', filter)
+        .select({
+          id: 'order.id',
+          date: 'order_details.created_at',
+          total: 'order_details.total_price',
+          shipping_status: 'shipping_details.shipping_status',
+          payment_status: 'order_details.payment_status',
+        });
+    } else {
+      orders = await knex('order')
+        .join(
+          'order_details',
+          'order.order_details_id',
+          '=',
+          'order_details.id'
+        )
+        .join(
+          'shipping_details',
+          'order.shipping_details_id',
+          'shipping_details.id'
+        )
+        .where('order.id', '=', filter)
+        .orWhere('order.user_id', '=', filter)
+        .select({
+          id: 'order.id',
+          date: 'order_details.created_at',
+          total: 'order_details.total_price',
+          shipping_status: 'shipping_details.shipping_status',
+          payment_status: 'order_details.payment_status',
+        });
+    }
+    if (orders.length < 1) {
+      const error = new Error(`No orders found!`);
+      error.status = 404;
+      return done(error);
+    }
+
     done(null, orders);
   } catch (err) {
     done(err);
