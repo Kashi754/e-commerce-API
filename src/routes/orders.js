@@ -37,16 +37,6 @@ ordersRouter.get('/', async (req, res, next) => {
   });
 });
 
-ordersRouter.get('/:orderId', verifyUserOrder, async (req, res, next) => {
-  await orders.getOrderById(req.orderId, (err, order) => {
-    if (err) {
-      console.error(err);
-      return next(err);
-    }
-    res.json(order);
-  });
-});
-
 ordersRouter.get('/admin', verifyUserIsAdmin, async (req, res, next) => {
   const { filter } = req.query || null;
 
@@ -67,6 +57,16 @@ ordersRouter.get('/admin', verifyUserIsAdmin, async (req, res, next) => {
       res.json(orders);
     });
   }
+});
+
+ordersRouter.get('/:orderId', verifyUserOrder, async (req, res, next) => {
+  await orders.getOrderById(req.orderId, (err, order) => {
+    if (err) {
+      console.error(err);
+      return next(err);
+    }
+    res.json(order);
+  });
 });
 
 module.exports = ordersRouter;
