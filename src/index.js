@@ -76,10 +76,10 @@ const sess = session({
   cookie: { ...SessionCookie },
 });
 
-if (process.env.NODE_ENV == 'production') {
-  app.set('trust proxy', 1);
-  sess.cookie.secure = true;
-}
+// if (process.env.NODE_ENV == 'production') {
+//   app.set('trust proxy', 1);
+//   sess.cookie.secure = true;
+// }
 
 app.set('trust proxy', 1);
 app.use(sess);
