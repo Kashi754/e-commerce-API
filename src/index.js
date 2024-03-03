@@ -61,12 +61,20 @@ const knexStore = new KnexSessionStore({
   tablename: 'sessions',
 });
 
-const SessionCookie = {
-  secure: false,
-  sameSite: 'lax',
-  maxAge: 1000 * 60 * 60 * 60 * 24 * 2, //2 day
-  httpOnly: true,
-};
+const SessionCookie =
+  process.env.NODE_ENV == 'development'
+    ? {
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 60 * 60 * 24 * 2, //2 day
+        httpOnly: true,
+      }
+    : {
+        secure: true,
+        sameSite: 'none',
+        maxAge: 1000 * 60 * 60 * 60 * 24 * 2, //2 day
+        httpOnly: true,
+      };
 
 const sess = session({
   secret: process.env.SESSION_SECRET,
@@ -76,10 +84,10 @@ const sess = session({
   cookie: { ...SessionCookie },
 });
 
-// if (process.env.NODE_ENV == 'production') {
-//   app.set('trust proxy', 1);
-//   sess.cookie.secure = true;
-// }
+if (process.env.NODE_ENV == 'production') {
+  app.set('trust proxy', 1);
+  sess.cookie.secure = true;
+}
 
 app.set('trust proxy', 1);
 app.use(sess);
