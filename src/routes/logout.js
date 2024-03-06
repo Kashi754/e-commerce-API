@@ -12,7 +12,7 @@ logoutRouter.get('/', (req, res, next) => {
         if (error) {
           return next(error);
         }
-        res.status(204).json({ message: `Successfully logged out!` });
+        res.status(200).json({ message: `Successfully logged out!` });
       });
     });
   } else {

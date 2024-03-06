@@ -39,5 +39,14 @@ exports.seed = async function (knex) {
       last_name: 'Account',
       role: 'admin',
     },
+    {
+      username: 'user',
+      email: 'user@email.com',
+      password_hash:
+        '$2b$10$u4dHO2qbbVWl.2Km8Na34uXxqdV8A0gRm7bSPaf2zah9Nz3Yibcvi',
+      first_name: 'User',
+      last_name: 'Account',
+      role: 'user',
+    },
   ]);
 };

@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "description": "An api for interacting with an E-Commerce server.\n\n### Admin user info:\n##### Username | 'admin'\n##### Password | 'password'",
-    "version": "1.0.0",
+    "description": "An api for interacting with the E-Commerce-App backend.\n\n### Admin user info:\n##### Username | 'admin'\n##### Password | 'password'<br /><br />\n### Regular user info:\n##### Username | 'user'\n##### Password | 'password'\n\nClick [here](https://e-commerce-app-frontend-e50n.onrender.com) to visit the frontend for the E-Commerce-App.\n\nIf the backend server does not immediately respond, please wait.  It should be ready in less than a minute.",
+    "version": "1.1.0",
     "title": "Online E-Commerce API",
     "contact": {
       "email": "arigorn15@gmail.com"
@@ -12,7 +12,12 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   },
-  "host": "http://localhost:3000/",
+  "servers": [
+    {
+      "url": "https://e-commerce-api-zjzj.onrender.com",
+      "description": "Production server endpoint"
+    }
+  ],
   "tags": [
     {
       "name": "User",
@@ -204,7 +209,7 @@
         "description": "Send logout request to the server",
         "operationId": "logout_user",
         "responses": {
-          "204": {
+          "200": {
             "description": "A successful response",
             "content": {
               "application/json": {

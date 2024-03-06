@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const pathToSwaggerUi = require('swagger-ui-dist').absolutePath();
 const passport = require('passport');
 const session = require('express-session');
 const rateLimiterMiddleware = require('./middleware/rateLimiterPostgres');
@@ -27,7 +26,6 @@ const unless = (path, middleware) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.use('/docs', express.static(pathToSwaggerUi));
 app.use('/assets', express.static('public'));
 
 // App Config
