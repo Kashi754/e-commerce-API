@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "description": "An api for interacting with the E-Commerce-App backend.\n\n### Admin user info:\n##### Username | 'admin'\n##### Password | 'password'<br /><br />\n### Regular user info:\n##### Username | 'user'\n##### Password | 'password'\n\nClick [here](https://e-commerce-app-frontend-e50n.onrender.com) to visit the frontend for the E-Commerce-App.\n\nIf the backend server does not immediately respond, please wait.  It should be ready in less than a minute.",
+    "description": "An api for interacting with the E-Commerce-App backend.\n\n### Admin user info:\n##### Username | 'admin'\n##### Password | 'password'<br /><br />\n### Regular user info:\n##### Username | 'user'\n##### Password | 'password'\n\nClick [here](https://e-commerce-app-frontend-e50n.onrender.com) to visit the frontend for the E-Commerce-App.\n\nIf the backend server does not immediately respond, please wait.  It should be ready in less than a minute.  Database will reset upon server restart.",
     "version": "1.1.0",
     "title": "Online E-Commerce API",
     "contact": {

@@ -64,13 +64,13 @@ const SessionCookie =
     ? {
         secure: false,
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 * 60 * 24 * 2, //2 day
+        maxAge: 1000 * 60 * 60 * 24 * 2, //2 day
         httpOnly: true,
       }
     : {
         secure: true,
         sameSite: 'none',
-        maxAge: 1000 * 60 * 60 * 60 * 24 * 2, //2 day
+        maxAge: 1000 * 60 * 60 * 24 * 2, //2 day
         httpOnly: true,
       };
 
@@ -81,10 +81,6 @@ const sess = session({
   store: knexStore,
   cookie: { ...SessionCookie },
 });
-
-if (process.env.NODE_ENV == 'production') {
-  app.set('trust proxy', 1);
-}
 
 app.set('trust proxy', 1);
 app.use(sess);
