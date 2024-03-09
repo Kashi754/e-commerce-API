@@ -15,7 +15,7 @@ passport.use(
     await users.findUserAuth(username, async (err, user) => {
       if (err) {
         req.authError = err;
-        return done(null, false);
+        return done(err);
       }
 
       if (!user) {
@@ -60,9 +60,15 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user.id);
 });
 
-passport.deserializeUser(async (user, done) => {
-  return done(null, user);
+passport.deserializeUser(async (id, done) => {
+  await users.findUserById(id, (err, user) => {
+    if (err) {
+      return done(err);
+    }
+
+    return done(null, user);
+  });
 });

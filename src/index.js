@@ -69,7 +69,7 @@ const SessionCookie =
       }
     : {
         secure: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 * 2, //2 day
         httpOnly: true,
       };

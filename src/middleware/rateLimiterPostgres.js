@@ -1,18 +1,40 @@
 const { knex } = require('../db/db');
-const { RateLimiterPostgres } = require('rate-limiter-flexible');
+const {
+  RateLimiterPostgres,
+  RLWrapperBlackAndWhite,
+} = require('rate-limiter-flexible');
 
-const createRateLimiter = async (opts) => {
+const createRateLimiter = async (opts, req) => {
+  const expectedUrl = 'https://e-commerce-app-frontend-e50n.onrender.com';
+  const expectedHostname = new URL(expectedUrl).hostname;
+
   return new Promise((resolve, reject) => {
     let rateLimiter;
     const ready = (err) => {
       if (err) {
         reject(err);
       } else {
-        resolve(rateLimiter);
+        resolve(rateLimiterWrapped);
       }
     };
 
     rateLimiter = new RateLimiterPostgres(opts, ready);
+
+    const whitelist = ['::1', '216.24.57.252:443'];
+
+    if (
+      whitelist.indexOf(req.get('host')) === -1 &&
+      req.get('host') === expectedHostname &&
+      req.protocol === 'https'
+    ) {
+      whitelist.push(req.ip);
+    }
+
+    const rateLimiterWrapped = new RLWrapperBlackAndWhite({
+      limiter: rateLimiter,
+      whiteList: whitelist,
+      blackList: [],
+    });
   });
 };
 
@@ -25,10 +47,10 @@ const rateLimiterMiddleware = async (req, res, next) => {
     inMemoryBlockOnConsumed: 300,
   };
 
-  const rateLimiter = await createRateLimiter(opts);
-  const key = req.user.id ? req.user.id : req.ip;
+  const rateLimiter = await createRateLimiter(opts, req);
+  const key = req.ip;
   if (req.path.indexOf('/images') === 0) {
-    const pointsToConsume = req.userId ? 1 : 5;
+    const pointsToConsume = req.user ? 1 : 5;
     rateLimiter
       .consume(key, pointsToConsume)
       .then(() => {
@@ -49,7 +71,7 @@ const rateLimiterMiddleware = async (req, res, next) => {
         });
       });
   } else {
-    const pointsToConsume = req.userId ? 1 : 30;
+    const pointsToConsume = req.user ? 1 : 30;
     rateLimiter
       .consume(key, pointsToConsume)
       .then(() => {

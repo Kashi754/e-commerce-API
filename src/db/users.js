@@ -21,6 +21,9 @@ exports.findUserById = async (id, done) => {
       error.status = 404;
       return done(error);
     }
+
+    const cartId = await knex('cart').first('id').where('user_id', user.id);
+    user.cartId = cartId.id;
     done(null, user);
   } catch (err) {
     done(err);

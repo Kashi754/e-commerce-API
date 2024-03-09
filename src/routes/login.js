@@ -1,5 +1,9 @@
 const express = require('express');
 const passport = require('passport');
+const {
+  limitLoginRequests,
+  limiterConsecutiveFailsByUsername,
+} = require('../middleware/loginLimiter');
 
 const loginRouter = express.Router();
 
@@ -23,16 +27,36 @@ loginRouter.get('/failed', (req, _res, next) => {
 
 loginRouter.post(
   '/',
-  passport.authenticate('local', { session: true, failWithError: true }),
+  [
+    limitLoginRequests,
+    passport.authenticate('local', { session: true, failWithError: true }),
+  ],
   (req, res) => {
     res.redirect('/login/success');
   },
-  (err, req, res, next) => {
+  async (err, req, res, next) => {
     if (req.authError) {
-      console.log('Login Failed!');
-      const error = req.authError;
-      error.status = 401;
-      return next(error);
+      try {
+        await limiterConsecutiveFailsByUsername.consume(req.userLogin);
+        const error = { message: req.authError };
+        error.status = 401;
+        return next(error);
+      } catch (rlRejected) {
+        if (rlRejected instanceof Error) {
+          console.log(req.userLogin);
+          rlRejected.status = 500;
+          return next(rlRejected);
+        } else {
+          res.set(
+            'Retry-After',
+            String(Math.round(rlRejected.msBeforeNext / 1000)) || 1
+          );
+          res.status(429).send({
+            status: 429,
+            message: 'Too Many Requests',
+          });
+        }
+      }
     }
   }
 );
@@ -41,6 +65,7 @@ loginRouter.get(
   '/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
+
 loginRouter.get(
   '/google/callback',
   passport.authenticate('google', {
