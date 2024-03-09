@@ -11,7 +11,6 @@ loginRouter.get('/success', (req, res, next) => {
   if (req.user) {
     res.status(200).json(req.user);
   } else {
-    console.log(req);
     const error = new Error('Please Log In!');
     error.status = 401;
     return next(error);
