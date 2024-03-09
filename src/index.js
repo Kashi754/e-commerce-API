@@ -76,7 +76,7 @@ const SessionCookie =
       }
     : {
         secure: true,
-        sameSite: 'lax',
+        sameSite: 'none',
         maxAge: 1000 * 60 * 60 * 24 * 2, //2 day
         httpOnly: true,
       };
