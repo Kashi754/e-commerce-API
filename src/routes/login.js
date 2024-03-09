@@ -43,7 +43,6 @@ loginRouter.post(
         return next(error);
       } catch (rlRejected) {
         if (rlRejected instanceof Error) {
-          console.log(req.userLogin);
           rlRejected.status = 500;
           return next(rlRejected);
         } else {
