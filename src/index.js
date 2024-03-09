@@ -5,6 +5,7 @@ const passport = require('passport');
 const session = require('express-session');
 const rateLimiterMiddleware = require('./middleware/rateLimiterPostgres');
 const forceHttps = require('./middleware/forceHttps');
+const helmet = require('helmet');
 
 // Import Passport config
 require('./config/passport');
@@ -28,11 +29,17 @@ const PORT = process.env.PORT || 5000;
 
 app.use('/assets', express.static('public'));
 
+// if (process.env.NODE_ENV !== 'development') {
+//   app.use(helmet());
+// }
+
+app.use(helmet());
+
 // App Config
 app.use(
   cors({
     origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
     optionsSuccessStatus: 200,
     preflightContinue: false,
@@ -47,7 +54,7 @@ app.use(forceHttps);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
-  app.use(morgan('tiny'));
+  app.use(morgan('common'));
 }
 
 // Session Config

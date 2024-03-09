@@ -17,7 +17,38 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+function imageFilter(req, file, cb) {
+  if (
+    file.mimetype === 'image/jpeg' ||
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/webp' ||
+    file.mimetype === 'image/jpg'
+  ) {
+    cb(null, true);
+  } else {
+    const error = new Error('Only image files are allowed!');
+    error.status = 400;
+    cb(error, false);
+  }
+}
+
+const upload = multer({
+  storage: storage,
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 1024 * 1024,
+    files: 1,
+  },
+}).single('image');
+
+function imageUpload(req, res, next) {
+  upload(req, res, (err) => {
+    if (err) {
+      return next(err);
+    }
+    next();
+  });
+}
 
 const productsRouter = express.Router();
 
@@ -79,7 +110,7 @@ productsRouter.get('/', async (req, res, next) => {
 
 productsRouter.post(
   '/',
-  [verifyUserLoggedIn, verifyUserIsAdmin, upload.single('image')],
+  [verifyUserLoggedIn, verifyUserIsAdmin, imageUpload],
   (req, res, next) => {
     const quantity = req.body.quantity || 0;
     const category_ids =
@@ -133,7 +164,7 @@ productsRouter.get('/:productId', (req, res, next) => {
 
 productsRouter.put(
   '/:productId',
-  [verifyUserLoggedIn, verifyUserIsAdmin, upload.single('image')],
+  [verifyUserLoggedIn, verifyUserIsAdmin, imageUpload],
   (req, res, next) => {
     const quantity = req.body.quantity || 0;
     const category_ids =
